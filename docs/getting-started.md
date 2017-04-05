@@ -43,7 +43,6 @@ Create a JWT using your Application Id.
 
 ```bash
 $ APP_JWT="$(nexmo jwt:generate ./private.key application_id=YOUR_APP_ID)"
-$ APP_JWT="$(nexmo jwt:generate ./private.key application_id=04aba7fb-46a9-4188-a0ce-7e68c0e2b8d1)"
 ```
 
 *Note: The above command saves the generated JWT to a `APP_JWT` variable.*
@@ -61,7 +60,6 @@ Generate a JWT for the user and take a note of it.
 
 ```bash
 nexmo jwt:generate ./private.key sub=jamie application_id=YOUR_APP_ID
-nexmo jwt:generate ./private.key sub=jamie application_id=04aba7fb-46a9-4188-a0ce-7e68c0e2b8d1
 ```
 
 ### Create the Android App
@@ -71,7 +69,7 @@ Open Android Studio and start a new project. We'll name it "Android Quickstart 1
 In the `build.gradle` file we'll add the Nexmo Conversation Android SDK
 
 ```groovy
-// AndroidQuickstart1/app/build.gradle
+//app/build.gradle
 dependencies {
 ...
   compile 'com.nexmo:conversation:0.2.0'
@@ -426,6 +424,7 @@ To send a message we simply need to call `sendText` on our instance of `Conversa
 In the `EventSendListener` we'll get two call backs: `onSent()` and `onError()`. If there's an error we'll just show an error in the logs and in a toast. We'll ignore the `onSent()` callback since we'll handle messages as they're received instead of as they're sent.
 
 ```java
+//ChatActivity.java
 private void sendMessage(final View v) {
     convo.sendText(msgEditTxt.getText().toString(), new EventSendListener() {
         @Override
@@ -444,6 +443,7 @@ private void sendMessage(final View v) {
 We want to know when text messages are being received so we need to add a `TextListener` to the conversation. We can do this like so:
 
 ```java
+//ChatActivity.java
 private void addListener() {
     if (convo != null) {
         convo.addTextListener(new TextListener() {
