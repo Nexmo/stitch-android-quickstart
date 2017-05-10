@@ -1,6 +1,5 @@
 package com.chris_guzman.simpleconversation1;
 
-import android.content.Context;
 import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -52,92 +51,89 @@ public class MainActivity extends AppCompatActivity {
         createConvoBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                createConversation(v.getContext());
+                createConversation();
             }
         });
-
 
         joinConvoBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                joinConversation(v.getContext());
+                joinConversation();
             }
         });
     }
 
     private void loginUser(View v) {
-        final Context context = v.getContext();
         conversationClient.login(userJwt, new LoginListener() {
             @Override
             public void onLogin(User user) {
-                logAndShow(context, user.getName() + " logged in!");
+                logAndShow(user.getName() + " logged in!");
             }
 
             @Override
             public void onUserAlreadyLoggedIn(User user) {
-                logAndShow(context, "Silly " + user.getName() + " you're already logged in!");
+                logAndShow("Silly " + user.getName() + " you're already logged in!");
             }
 
             @Override
             public void onTokenInvalid() {
-                logAndShow(context, "Error token invalid. Generate new token");
+                logAndShow("Error token invalid. Generate new token");
             }
 
             @Override
             public void onTokenExpired() {
-                logAndShow(context, "Error token expired. Generate new token");
+                logAndShow("Error token expired. Generate new token");
             }
 
             @Override
             public void onError(int errCode, String errMessage) {
-                logAndShow(context, "On Login Error. Code" + errCode + "Message: " + errMessage);
+                logAndShow("On Login Error. Code" + errCode + "Message: " + errMessage);
             }
         });
     }
 
-    private void createConversation(final Context context) {
+    private void createConversation() {
         conversationClient.newConversation(new Date().toString(), new ConversationCreateListener() {
             @Override
             public void onConversationCreated(Conversation conversation) {
-                logAndShow(context, "Conversation created: " + conversation.getName() + " / " + conversation.getConversationId());
+                logAndShow("Conversation created: " + conversation.getName() + " / " + conversation.getConversationId());
                 convo = conversation;
             }
 
             @Override
             public void onError(int errCode, String errMessage) {
-                logAndShow(context, "onConversationCreated Error. Code " + errCode + " Message: " + errMessage);
+                logAndShow("onConversationCreated Error. Code " + errCode + " Message: " + errMessage);
             }
         });
     }
 
-    private void joinConversation(final Context context) {
+    private void joinConversation() {
         convo.join(new JoinListener() {
             @Override
             public void onConversationJoined(Conversation conversation, Member member) {
-                logAndShow(context, member.getName() + " has joined " + conversation.getConversationId());
-                goToChatActivity(context);
+                logAndShow(member.getName() + " has joined " + conversation.getConversationId());
+                goToChatActivity();
             }
 
             @Override
             public void onError(int errCode, String errMessage) {
-                logAndShow(context, "onConversationJoined Error. Code " + errCode + " Message: " + errMessage);
+                logAndShow("onConversationJoined Error. Code " + errCode + " Message: " + errMessage);
             }
         });
     }
 
-    private void goToChatActivity(Context context) {
-        //TODO: Make ChatActivity
-        Intent intent = new Intent(context, ChatActivity.class);
+    private void goToChatActivity() {
+        Intent intent = new Intent(MainActivity.this, ChatActivity.class);
         intent.putExtra("CONVERSATION-ID", convo.getConversationId());
         startActivity(intent);
     }
 
-    private void logAndShow(final Context context, final String message) {
+    private void logAndShow(final String message) {
         Log.d(TAG, message);
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                Toast.makeText(context, message, Toast.LENGTH_SHORT).show();
+                Toast.makeText(MainActivity.this, message, Toast.LENGTH_SHORT).show();
             }
         });
     }

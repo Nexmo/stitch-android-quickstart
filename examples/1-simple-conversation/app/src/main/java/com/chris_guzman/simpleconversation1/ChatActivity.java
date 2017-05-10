@@ -1,6 +1,5 @@
 package com.chris_guzman.simpleconversation1;
 
-import android.content.Context;
 import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -13,11 +12,12 @@ import android.widget.Toast;
 
 import com.nexmo.sdk.conversation.client.Conversation;
 import com.nexmo.sdk.conversation.client.ConversationClient;
+import com.nexmo.sdk.conversation.client.Image;
 import com.nexmo.sdk.conversation.client.Member;
 import com.nexmo.sdk.conversation.client.Message;
 import com.nexmo.sdk.conversation.client.Text;
 import com.nexmo.sdk.conversation.client.event.CompletionListeners.EventSendListener;
-import com.nexmo.sdk.conversation.client.event.TextListener;
+import com.nexmo.sdk.conversation.client.event.MessageListener;
 
 public class ChatActivity extends AppCompatActivity {
     private static final String TAG = "CAPI-DEMO";
@@ -28,6 +28,7 @@ public class ChatActivity extends AppCompatActivity {
 
     private ConversationClient conversationClient;
     private Conversation convo;
+    private MessageListener messageListener;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,7 +41,7 @@ public class ChatActivity extends AppCompatActivity {
         sendMsgBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                sendMessage(v);
+                sendMessage();
             }
         });
 
@@ -53,23 +54,43 @@ public class ChatActivity extends AppCompatActivity {
         addListener();
     }
 
-    private void sendMessage(final View v) {
-        convo.sendText(msgEditTxt.getText().toString(), new EventSendListener() {
-            @Override
-            public void onSent(Conversation conversation, Message message) {
-                //intentionally left blank
-            }
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        convo.removeMessageListener(messageListener);
+    }
 
-            @Override
-            public void onError(int errCode, String errMessage) {
-                logAndShow(v.getContext(), "onMessageSent Error. Code " + errCode + " Message: " + errMessage);
-            }
-        });
+    private void sendMessage() {
+        if (convo != null) {
+            convo.sendText(msgEditTxt.getText().toString(), new EventSendListener() {
+                @Override
+                public void onSent(Conversation conversation, Message message) {
+                    //intentionally left blank
+                }
+
+                @Override
+                public void onError(int errCode, String errMessage) {
+                    logAndShow("onMessageSent Error. Code " + errCode + " Message: " + errMessage);
+                }
+            });
+        } else {
+            logAndShow("Error sendText: convo is null");
+        }
     }
 
     private void addListener() {
         if (convo != null) {
-            convo.addTextListener(new TextListener() {
+            messageListener = new MessageListener() {
+                @Override
+                public void onError(int errCode, String errMessage) {
+                    logAndShow("MessageListener error " + errCode + " / " + errMessage);
+                }
+
+                @Override
+                public void onImageDownloaded(Conversation conversation, Image image) {
+                    //intentionally left blank
+                }
+
                 @Override
                 public void onTextReceived(Conversation conversation, Text message) {
                     showMessage(message);
@@ -79,10 +100,22 @@ public class ChatActivity extends AppCompatActivity {
                 public void onTextDeleted(Conversation conversation, Text message, Member member) {
                     //intentionally left blank
                 }
-            });
+
+                @Override
+                public void onImageReceived(Conversation conversation, Image image) {
+                    //intentionally left blank
+                }
+
+                @Override
+                public void onImageDeleted(Conversation conversation, Image message, Member member) {
+                    //intentionally left blank
+                }
+            };
+            convo.addMessageListener(messageListener);
         } else {
-            logAndShow(this, "Error adding TextListener: convo is null");
+            logAndShow("Error adding TextListener: convo is null");
         }
+
     }
 
     private void showMessage(final Text message) {
@@ -91,17 +124,17 @@ public class ChatActivity extends AppCompatActivity {
             public void run() {
                 msgEditTxt.setText(null);
                 String prevText = chatTxt.getText().toString();
-                chatTxt.setText(prevText + "\n" + message.getPayload());
+                chatTxt.setText(prevText + "\n" + message.getText());
             }
         });
     }
 
-    private void logAndShow(final Context context, final String message) {
+    private void logAndShow(final String message) {
         Log.d(TAG, message);
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                Toast.makeText(context, message, Toast.LENGTH_SHORT).show();
+                Toast.makeText(ChatActivity.this, message, Toast.LENGTH_SHORT).show();
             }
         });
     }

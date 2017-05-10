@@ -4,6 +4,7 @@ import android.app.Application;
 import android.widget.Toast;
 
 import com.nexmo.sdk.conversation.client.ConversationClient;
+import com.nexmo.sdk.conversation.client.event.CompletionListeners.PushEnableListener;
 import com.nexmo.sdk.conversation.client.event.ConversationClientException;
 
 public class ConversationClientApplication extends Application {
