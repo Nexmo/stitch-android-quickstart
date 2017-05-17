@@ -64,7 +64,7 @@ public class ChatActivity extends AppCompatActivity {
         if (convo != null) {
             convo.sendText(msgEditTxt.getText().toString(), new EventSendListener() {
                 @Override
-                public void onSent(Conversation conversation, Message message) {
+                public void onSent(Message message) {
                     //intentionally left blank
                 }
 
@@ -87,27 +87,27 @@ public class ChatActivity extends AppCompatActivity {
                 }
 
                 @Override
-                public void onImageDownloaded(Conversation conversation, Image image) {
+                public void onImageDownloaded(Image image) {
                     //intentionally left blank
                 }
 
                 @Override
-                public void onTextReceived(Conversation conversation, Text message) {
+                public void onTextReceived(Text message) {
                     showMessage(message);
                 }
 
                 @Override
-                public void onTextDeleted(Conversation conversation, Text message, Member member) {
+                public void onTextDeleted(Text message, Member member) {
                     //intentionally left blank
                 }
 
                 @Override
-                public void onImageReceived(Conversation conversation, Image image) {
+                public void onImageReceived(Image image) {
                     //intentionally left blank
                 }
 
                 @Override
-                public void onImageDeleted(Conversation conversation, Image message, Member member) {
+                public void onImageDeleted(Image message, Member member) {
                     //intentionally left blank
                 }
             };

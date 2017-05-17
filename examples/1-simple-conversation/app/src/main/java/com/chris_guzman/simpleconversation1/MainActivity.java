@@ -20,7 +20,7 @@ import java.util.Date;
 
 public class MainActivity extends AppCompatActivity {
     private static final String TAG = "CAPI-DEMO";
-    String userJwt = "";
+    String userJwt;
 
     private Button loginBtn;
     private Button createConvoBtn;
@@ -110,8 +110,8 @@ public class MainActivity extends AppCompatActivity {
     private void joinConversation() {
         convo.join(new JoinListener() {
             @Override
-            public void onConversationJoined(Conversation conversation, Member member) {
-                logAndShow(member.getName() + " has joined " + conversation.getConversationId());
+            public void onConversationJoined(Member member) {
+                logAndShow(member.getName() + " has joined " + convo.getConversationId());
                 goToChatActivity();
             }
 
