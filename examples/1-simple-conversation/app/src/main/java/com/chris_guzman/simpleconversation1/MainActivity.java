@@ -28,6 +28,7 @@ public class MainActivity extends AppCompatActivity {
 
     private ConversationClient conversationClient;
     private Conversation convo;
+    private Button combineConvoBtn;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,12 +40,12 @@ public class MainActivity extends AppCompatActivity {
 
         loginBtn = (Button) findViewById(R.id.user_login_btn);
         createConvoBtn = (Button) findViewById(R.id.create_convo_btn);
-        joinConvoBtn = (Button) findViewById(R.id.join_convo_btn);
+        combineConvoBtn = (Button) findViewById(R.id.combine_convo_btn);
 
         loginBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                loginUser(v);
+                loginUser();
             }
         });
 
@@ -55,15 +56,15 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        joinConvoBtn.setOnClickListener(new View.OnClickListener() {
+        combineConvoBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                joinConversation();
+                loginAndCreate();
             }
         });
     }
 
-    private void loginUser(View v) {
+    private void loginUser() {
         conversationClient.login(userJwt, new LoginListener() {
             @Override
             public void onLogin(User user) {
@@ -92,12 +93,44 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+    private void loginAndCreate() {
+        conversationClient.login(userJwt, new LoginListener() {
+            @Override
+            public void onLogin(User user) {
+                logAndShow(user.getName() + " logged in!");
+                createConversation();
+            }
+
+            @Override
+            public void onUserAlreadyLoggedIn(User user) {
+                logAndShow("Silly " + user.getName() + " you're already logged in!");
+                createConversation();
+            }
+
+            @Override
+            public void onTokenInvalid() {
+                logAndShow("Error token invalid. Generate new token");
+            }
+
+            @Override
+            public void onTokenExpired() {
+                logAndShow("Error token expired. Generate new token");
+            }
+
+            @Override
+            public void onError(int errCode, String errMessage) {
+                logAndShow("On Login Error. Code" + errCode + "Message: " + errMessage);
+            }
+        });
+    }
+
     private void createConversation() {
         conversationClient.newConversation(new Date().toString(), new ConversationCreateListener() {
             @Override
             public void onConversationCreated(Conversation conversation) {
                 logAndShow("Conversation created: " + conversation.getName() + " / " + conversation.getConversationId());
                 convo = conversation;
+                joinConversation();
             }
 
             @Override

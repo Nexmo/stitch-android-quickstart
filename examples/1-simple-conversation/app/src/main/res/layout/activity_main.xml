@@ -15,12 +15,12 @@
         android:id="@+id/create_convo_btn"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Create Conversation" />
+        android:text="Create &amp; Join Conversation" />
 
     <Button
-        android:id="@+id/join_convo_btn"
+        android:id="@+id/combine_convo_btn"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Join Conversation"/>
+        android:text="Login, Create, &amp; Join"/>
 
 </LinearLayout>
