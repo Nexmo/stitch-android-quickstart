@@ -20,18 +20,20 @@ import com.nexmo.sdk.conversation.client.event.CompletionListeners.ConversationC
 import com.nexmo.sdk.conversation.client.event.CompletionListeners.ConversationListListener;
 import com.nexmo.sdk.conversation.client.event.CompletionListeners.JoinListener;
 import com.nexmo.sdk.conversation.client.event.CompletionListeners.LoginListener;
+import com.nexmo.sdk.conversation.client.event.CompletionListeners.LogoutListener;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
     private static final String TAG = MainActivity.class.getSimpleName();
-    private String jamieToken;
-    private String adamToken;
+    private String chrisToken;
+    private String janeToken;
     private Button loginBtn;
     private Button createConversationBtn;
     private ConversationClient client;
     private Button joinBtn;
+    private Button logoutBtn;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,6 +45,7 @@ public class MainActivity extends AppCompatActivity {
         loginBtn = (Button) findViewById(R.id.login);
         createConversationBtn = (Button) findViewById(R.id.create_conversation);
         joinBtn = (Button) findViewById(R.id.join);
+        logoutBtn = (Button) findViewById(R.id.logout);
 
         loginBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -64,18 +67,39 @@ public class MainActivity extends AppCompatActivity {
                 retrieveConversations();
             }
         });
+
+        logoutBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                logout();
+            }
+        });
+    }
+
+    private void logout() {
+        client.logout(new LogoutListener() {
+            @Override
+            public void onLogout(User user) {
+                logAndShow("onLogout: " + user.getName());
+            }
+
+            @Override
+            public void onError(int errCode, String errMessage) {
+                logAndShow("onError: " + errMessage + " / " + errCode);
+            }
+        });
     }
 
     private void logIn() {
         final AlertDialog.Builder dialog = new AlertDialog.Builder(MainActivity.this)
                 .setTitle("Which user are you logging in as?")
-                .setItems(new String[]{"jamie", "adam"}, new DialogInterface.OnClickListener() {
+                .setItems(new String[]{"chris", "jane"}, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         if (which == 0) {
-                            loginAsUser(jamieToken);
+                            loginAsUser(chrisToken);
                         } else {
-                            loginAsUser(adamToken);
+                            loginAsUser(janeToken);
                         }
                     }
                 });
@@ -92,27 +116,27 @@ public class MainActivity extends AppCompatActivity {
         client.login(token, new LoginListener() {
             @Override
             public void onLogin(User user) {
-                Log.d(TAG, "onLogin: ");
+                logAndShow("onLogin: ");
             }
 
             @Override
             public void onUserAlreadyLoggedIn(User user) {
-                Log.d(TAG, "onUserAlreadyLoggedIn: ");
+                logAndShow("onUserAlreadyLoggedIn: ");
             }
 
             @Override
             public void onTokenInvalid() {
-                Log.d(TAG, "onTokenInvalid: ");
+                logAndShow("onTokenInvalid: ");
             }
 
             @Override
             public void onTokenExpired() {
-                Log.d(TAG, "onTokenExpired: ");
+                logAndShow("onTokenExpired: ");
             }
 
             @Override
             public void onError(int errCode, String errMessage) {
-                Log.d(TAG, "onLogin onError: " + errMessage + " / " + errCode);
+                logAndShow("onLogin onError: " + errMessage + " / " + errCode);
             }
         });
     }
@@ -121,7 +145,7 @@ public class MainActivity extends AppCompatActivity {
         client.getConversations(new ConversationListListener() {
             @Override
             public void onConversationList(List<Conversation> conversationList) {
-                Log.d(TAG, "onConversationList: list count = " + conversationList.size());
+                logAndShow("onConversationList: list count = " + conversationList.size());
                 if (conversationList.size() > 0) {
                     showConversationList(conversationList);
                 } else {
@@ -131,7 +155,7 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onError(int errCode, String errMessage) {
-                Log.d(TAG, "onConversationList onError: " + errMessage + " / " + errCode);
+                logAndShow("onConversationList onError: " + errMessage + " / " + errCode);
             }
         });
     }
@@ -197,7 +221,7 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onError(int errCode, String errMessage) {
-                Log.d(TAG, "onConversationCreated onError: ");
+                logAndShow("onConversationCreated onError: ");
             }
         });
 
@@ -220,10 +244,10 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    private void joinConversation(Conversation conversation) {
+    private void joinConversation(final Conversation conversation) {
         conversation.join(new JoinListener() {
             @Override
-            public void onConversationJoined(Conversation conversation, Member member) {
+            public void onConversationJoined(Member member) {
                 Intent intent = new Intent(MainActivity.this, ChatActivity.class);
                 intent.putExtra("CONVERSATION_ID", conversation.getConversationId());
                 startActivity(intent);
@@ -231,9 +255,20 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onError(int errCode, String errMessage) {
-                Log.d(TAG, "onConversationJoined onError: " + errMessage + " / " + errCode);
+                logAndShow("onConversationJoined onError: " + errMessage + " / " + errCode);
             }
         });
     }
+
+    private void logAndShow(final String message) {
+        Log.d(TAG, message);
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                Toast.makeText(MainActivity.this, message, Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
 
 }

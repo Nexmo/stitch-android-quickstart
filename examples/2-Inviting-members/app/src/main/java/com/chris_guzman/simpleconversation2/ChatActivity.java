@@ -19,8 +19,11 @@ import com.nexmo.sdk.conversation.client.Image;
 import com.nexmo.sdk.conversation.client.Member;
 import com.nexmo.sdk.conversation.client.Message;
 import com.nexmo.sdk.conversation.client.Text;
+import com.nexmo.sdk.conversation.client.User;
 import com.nexmo.sdk.conversation.client.event.CompletionListeners.EventSendListener;
 import com.nexmo.sdk.conversation.client.event.CompletionListeners.InviteSendListener;
+import com.nexmo.sdk.conversation.client.event.CompletionListeners.JoinListener;
+import com.nexmo.sdk.conversation.client.event.CompletionListeners.LogoutListener;
 import com.nexmo.sdk.conversation.client.event.MessageListener;
 
 public class ChatActivity extends AppCompatActivity {
@@ -83,16 +86,27 @@ public class ChatActivity extends AppCompatActivity {
     }
 
     private void inviteUser() {
-        String otherUser = (conversationClient.getLoggedInUser().getName().equals("adam") ? "jamie" : "adam");
+        String otherUser = (conversationClient.getLoggedInUser().getName().equals("chris") ? "jane" : "chris");
         convo.invite(otherUser, new InviteSendListener() {
             @Override
-            public void onInviteSent(Conversation conversation, Member invitedMember) {
-                Log.d(TAG, "onInviteSent: ");
+            public void onInviteSent(Member invitedMember) {
+                logAndShow("onInviteSent: ");
+                convo.join(new JoinListener() {
+                    @Override
+                    public void onConversationJoined(Member member) {
+                        logAndShow("onConversationJoined: " + member.getName());
+                    }
+
+                    @Override
+                    public void onError(int errCode, String errMessage) {
+                        logAndShow("onConversationJoined onError: " + errMessage + " / " + errCode);
+                    }
+                });
             }
 
             @Override
             public void onError(int errCode, String errMessage) {
-                Log.d(TAG, "onInviteSent onError: ");
+                logAndShow("onInviteSent onError: ");
             }
         });
     }
@@ -100,7 +114,7 @@ public class ChatActivity extends AppCompatActivity {
     private void sendMessage() {
         convo.sendText(msgEditTxt.getText().toString(), new EventSendListener() {
             @Override
-            public void onSent(Conversation conversation, Message message) {
+            public void onSent(Message message) {
                 //intentionally left blank
             }
 
@@ -114,33 +128,33 @@ public class ChatActivity extends AppCompatActivity {
     private void addListener() {
         messageListener = new MessageListener() {
             @Override
-            public void onTextReceived(Conversation conversation, Text message) {
+            public void onTextReceived(Text message) {
                 showMessage(message);
             }
 
             @Override
-            public void onTextDeleted(Conversation conversation, Text message, Member member) {
+            public void onTextDeleted(Text message, Member member) {
 
             }
 
             @Override
-            public void onImageReceived(Conversation conversation, Image image) {
+            public void onImageReceived(Image image) {
 
             }
 
             @Override
-            public void onImageDeleted(Conversation conversation, Image message, Member member) {
+            public void onImageDeleted(Image message, Member member) {
 
             }
 
             @Override
-            public void onImageDownloaded(Conversation conversation, Image image) {
+            public void onImageDownloaded(Image image) {
 
             }
 
             @Override
             public void onError(int errCode, String errMessage) {
-                Log.d(TAG, "onError: " + errMessage + errCode);
+                logAndShow("onError: " + errMessage + errCode);
             }
         };
 

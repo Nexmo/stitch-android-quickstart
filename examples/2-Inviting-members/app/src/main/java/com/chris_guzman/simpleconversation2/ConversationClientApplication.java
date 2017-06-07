@@ -12,12 +12,7 @@ public class ConversationClientApplication extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
-        try {
-            this.conversationClient = new ConversationClient.ConversationClientBuilder().context(this).build();
-        } catch (ConversationClientException e) {
-            e.printStackTrace();
-            Toast.makeText(getApplicationContext(), "ConversationClientApplication builder error!", Toast.LENGTH_LONG).show();
-        }
+        this.conversationClient = new ConversationClient.ConversationClientBuilder().context(this).build();
     }
 
     public ConversationClient getConversationClient() {
