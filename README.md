@@ -21,7 +21,7 @@ TODO: General overview of the plans for the Conversation API
 
 * [Simple conversation](examples/1-simple-conversation/)
 * [Inviting users to conversations](examples/2-Inviting-members)
-* [User typing and message seen indicators](examples/3-utilizing-events)
+* [User typing and message seen indicators](examples/3-Utilizing-Events)
 
 ## Ask Questions and Give Feedback
 
