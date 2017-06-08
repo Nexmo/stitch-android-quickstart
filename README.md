@@ -11,9 +11,9 @@ TODO: General overview of the plans for the Conversation API
 ## Get Started
 
 1. Try out the quickstarts that walk through using key conversation SDK features
-  1. [A simple conversation](docs/getting-started.md)
-  2. Inviting users to conversations - coming soon
-  3. User typing and message seen indicators - coming soon
+    1. [A simple conversation](docs/getting-started.md)
+    2. Inviting users to conversations - coming soon
+    3. User typing and message seen indicators - coming soon
 2. [Explore the API reference](https://conversation-android-docs.herokuapp.com/) and build new things
 3. Ask questions and request features by [creating issues](https://github.com/Nexmo/conversation-android-quickstart/issues/new)
 
