@@ -1,8 +1,8 @@
 package com.chris_guzman.simpleconversation1;
 
 import android.content.Intent;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -17,10 +17,11 @@ import com.nexmo.sdk.conversation.client.Member;
 import com.nexmo.sdk.conversation.client.Message;
 import com.nexmo.sdk.conversation.client.Text;
 import com.nexmo.sdk.conversation.client.event.CompletionListeners.EventSendListener;
+import com.nexmo.sdk.conversation.client.event.EventType;
 import com.nexmo.sdk.conversation.client.event.MessageListener;
 
 public class ChatActivity extends AppCompatActivity {
-    private static final String TAG = "CAPI-DEMO";
+    private final String TAG = ChatActivity.this.getClass().getSimpleName();
 
     private TextView chatTxt;
     private EditText msgEditTxt;
@@ -51,6 +52,11 @@ public class ChatActivity extends AppCompatActivity {
         Intent intent = getIntent();
         String conversationId = intent.getStringExtra("CONVERSATION-ID");
         convo = conversationClient.getConversation(conversationId);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
         addListener();
     }
 
@@ -61,61 +67,54 @@ public class ChatActivity extends AppCompatActivity {
     }
 
     private void sendMessage() {
-        if (convo != null) {
-            convo.sendText(msgEditTxt.getText().toString(), new EventSendListener() {
-                @Override
-                public void onSent(Message message) {
-                    //intentionally left blank
+        convo.sendText(msgEditTxt.getText().toString(), new EventSendListener() {
+            @Override
+            public void onSent(Message message) {
+                if (message.getType().equals(EventType.TEXT)) {
+                    Log.d(TAG, "onSent: " + ((Text) message).getText());
                 }
+            }
 
-                @Override
-                public void onError(int errCode, String errMessage) {
-                    logAndShow("onMessageSent Error. Code " + errCode + " Message: " + errMessage);
-                }
-            });
-        } else {
-            logAndShow("Error sendText: convo is null");
-        }
+            @Override
+            public void onError(int errCode, String errMessage) {
+                logAndShow("Error sending message: " + errMessage);
+            }
+        });
     }
 
     private void addListener() {
-        if (convo != null) {
-            messageListener = new MessageListener() {
-                @Override
-                public void onError(int errCode, String errMessage) {
-                    logAndShow("MessageListener error " + errCode + " / " + errMessage);
-                }
+        messageListener = new MessageListener() {
+            @Override
+            public void onError(int errCode, String errMessage) {
+                logAndShow("Error adding MessageListener: " + errMessage);
+            }
 
-                @Override
-                public void onImageDownloaded(Image image) {
-                    //intentionally left blank
-                }
+            @Override
+            public void onImageDownloaded(Image image) {
+                //intentionally left blank
+            }
 
-                @Override
-                public void onTextReceived(Text message) {
-                    showMessage(message);
-                }
+            @Override
+            public void onTextReceived(Text message) {
+                showMessage(message);
+            }
 
-                @Override
-                public void onTextDeleted(Text message, Member member) {
-                    //intentionally left blank
-                }
+            @Override
+            public void onTextDeleted(Text message, Member member) {
+                //intentionally left blank
+            }
 
-                @Override
-                public void onImageReceived(Image image) {
-                    //intentionally left blank
-                }
+            @Override
+            public void onImageReceived(Image image) {
+                //intentionally left blank
+            }
 
-                @Override
-                public void onImageDeleted(Image message, Member member) {
-                    //intentionally left blank
-                }
-            };
-            convo.addMessageListener(messageListener);
-        } else {
-            logAndShow("Error adding TextListener: convo is null");
-        }
-
+            @Override
+            public void onImageDeleted(Image message, Member member) {
+                //intentionally left blank
+            }
+        };
+        convo.addMessageListener(messageListener);
     }
 
     private void showMessage(final Text message) {
