@@ -9,7 +9,7 @@ import com.nexmo.sdk.conversation.client.ConversationClient;
  * Created by chrisguzman on 6/5/17.
  */
 
-public class ConversationApplication extends Application {
+public class ConversationClientApplication extends Application {
 
     private ConversationClient conversationClient;
 

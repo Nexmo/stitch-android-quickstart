@@ -19,11 +19,9 @@ import com.nexmo.sdk.conversation.client.Image;
 import com.nexmo.sdk.conversation.client.Member;
 import com.nexmo.sdk.conversation.client.Message;
 import com.nexmo.sdk.conversation.client.Text;
-import com.nexmo.sdk.conversation.client.User;
 import com.nexmo.sdk.conversation.client.event.CompletionListeners.EventSendListener;
 import com.nexmo.sdk.conversation.client.event.CompletionListeners.InviteSendListener;
 import com.nexmo.sdk.conversation.client.event.CompletionListeners.JoinListener;
-import com.nexmo.sdk.conversation.client.event.CompletionListeners.LogoutListener;
 import com.nexmo.sdk.conversation.client.event.MessageListener;
 
 public class ChatActivity extends AppCompatActivity {
@@ -86,27 +84,16 @@ public class ChatActivity extends AppCompatActivity {
     }
 
     private void inviteUser() {
-        String otherUser = (conversationClient.getLoggedInUser().getName().equals("chris") ? "jane" : "chris");
+        final String otherUser = (conversationClient.getLoggedInUser().getName().equals("tom") ? "jerry" : "tom");
         convo.invite(otherUser, new InviteSendListener() {
             @Override
             public void onInviteSent(Member invitedMember) {
-                logAndShow("onInviteSent: ");
-                convo.join(new JoinListener() {
-                    @Override
-                    public void onConversationJoined(Member member) {
-                        logAndShow("onConversationJoined: " + member.getName());
-                    }
-
-                    @Override
-                    public void onError(int errCode, String errMessage) {
-                        logAndShow("onConversationJoined onError: " + errMessage + " / " + errCode);
-                    }
-                });
+                logAndShow("Invite sent to: " + invitedMember.getName());
             }
 
             @Override
             public void onError(int errCode, String errMessage) {
-                logAndShow("onInviteSent onError: ");
+                logAndShow("Error sending invite: " + errMessage);
             }
         });
     }
@@ -115,12 +102,17 @@ public class ChatActivity extends AppCompatActivity {
         convo.sendText(msgEditTxt.getText().toString(), new EventSendListener() {
             @Override
             public void onSent(Message message) {
-                //intentionally left blank
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        msgEditTxt.setText(null);
+                    }
+                });
             }
 
             @Override
             public void onError(int errCode, String errMessage) {
-                logAndShow("onMessageSent Error. Code " + errCode + " Message: " + errMessage);
+                logAndShow("Error sending message: " + errMessage);
             }
         });
     }

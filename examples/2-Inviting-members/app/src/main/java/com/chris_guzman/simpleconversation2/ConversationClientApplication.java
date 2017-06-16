@@ -1,6 +1,7 @@
 package com.chris_guzman.simpleconversation2;
 
 import android.app.Application;
+import android.util.Log;
 import android.widget.Toast;
 
 import com.nexmo.sdk.conversation.client.ConversationClient;
@@ -12,7 +13,7 @@ public class ConversationClientApplication extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
-        this.conversationClient = new ConversationClient.ConversationClientBuilder().context(this).build();
+        this.conversationClient = new ConversationClient.ConversationClientBuilder().context(this).logLevel(Log.VERBOSE).build();
     }
 
     public ConversationClient getConversationClient() {

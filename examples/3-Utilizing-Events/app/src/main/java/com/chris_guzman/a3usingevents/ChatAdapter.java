@@ -2,16 +2,21 @@ package com.chris_guzman.a3usingevents;
 
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.nexmo.sdk.conversation.client.Conversation;
 import com.nexmo.sdk.conversation.client.Message;
+import com.nexmo.sdk.conversation.client.SeenReceipt;
 import com.nexmo.sdk.conversation.client.Text;
+import com.nexmo.sdk.conversation.client.event.CompletionListeners.MarkedAsSeenListener;
 import com.nexmo.sdk.conversation.client.event.EventType;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -20,14 +25,29 @@ import java.util.List;
 
 class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder> {
 
-    private final List<Message> messages;
+    private static final String TAG = "ChatAdapter";
+    private List<Message> messages = new ArrayList<>();
     private Context context;
-    private Conversation convo;
+    private MarkedAsSeenListener markedAsSeenListener = new MarkedAsSeenListener() {
+        @Override
+        public void onMarkedAsSeen() {
+            Log.d(TAG, "onMarkedAsSeen: ");
+        }
 
-    public ChatAdapter(Context context, Conversation convo) {
+        @Override
+        public void onError(int errCode, String errMessage) {
+            Log.d(TAG, "onError onMarkedAsSeen: " + errMessage + " / " + errCode);
+        }
+    };
+
+    public ChatAdapter(Context context) {
         this.context = context;
-        this.convo = convo;
-        this.messages = convo.getMessages();
+        setHasStableIds(true);
+    }
+
+    public void setMessages(List<Message> messages) {
+        this.messages = messages;
+        notifyDataSetChanged();
     }
 
     @Override
@@ -43,8 +63,12 @@ class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder> {
     @Override
     public void onBindViewHolder(ChatAdapter.ViewHolder holder, int position) {
         Message message = messages.get(position);
+        message.markAsSeen(markedAsSeenListener);
         if (message.getType().equals(EventType.TEXT)) {
             holder.text.setText(((Text) message).getText());
+            if (!message.getSeenReceipts().isEmpty()) {
+                holder.seenIcon.setVisibility(View.VISIBLE);
+            }
         }
 
 
@@ -57,10 +81,12 @@ class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder> {
 
     public class ViewHolder extends RecyclerView.ViewHolder {
         private final TextView text;
+        private final ImageView seenIcon;
 
         public ViewHolder(View itemView) {
             super(itemView);
             text = (TextView)itemView.findViewById(R.id.item_chat_txt);
+            seenIcon = (ImageView)itemView.findViewById(R.id.item_chat_seen_img);
         }
     }
 }

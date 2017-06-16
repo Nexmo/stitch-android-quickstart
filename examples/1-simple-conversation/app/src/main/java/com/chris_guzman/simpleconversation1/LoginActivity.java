@@ -16,17 +16,19 @@ import com.nexmo.sdk.conversation.client.User;
 import com.nexmo.sdk.conversation.client.event.CompletionListeners.ConversationCreateListener;
 import com.nexmo.sdk.conversation.client.event.CompletionListeners.JoinListener;
 import com.nexmo.sdk.conversation.client.event.CompletionListeners.LoginListener;
+import com.nexmo.sdk.conversation.client.event.CompletionListeners.LogoutListener;
 
 import java.util.Date;
 
 public class LoginActivity extends AppCompatActivity {
-    private final String TAG = LoginActivity.this.getClass().getSimpleName();
+    private final String TAG = LoginActivity.class.getSimpleName();
     private String userJwt;
 
     private ConversationClient conversationClient;
     private TextView loginTxt;
     private Button loginBtn;
     private Button chatBtn;
+    private Button logoutBtn;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,6 +41,14 @@ public class LoginActivity extends AppCompatActivity {
         loginTxt = (TextView) findViewById(R.id.login_text);
         loginBtn = (Button) findViewById(R.id.login);
         chatBtn = (Button) findViewById(R.id.chat);
+        logoutBtn = (Button) findViewById(R.id.logout);
+
+        logoutBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                logout();
+            }
+        });
 
         loginBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -101,6 +111,20 @@ public class LoginActivity extends AppCompatActivity {
             @Override
             public void run() {
                 loginTxt.setText("Logged in as " + user.getName() + "\nStart a new conversation");
+            }
+        });
+    }
+
+    private void logout() {
+        conversationClient.logout(new LogoutListener() {
+            @Override
+            public void onLogout(User user) {
+                logAndShow(user.getName() + " logged out");
+            }
+
+            @Override
+            public void onError(int errCode, String errMessage) {
+                logAndShow("Error logging out: " + errMessage);
             }
         });
     }
