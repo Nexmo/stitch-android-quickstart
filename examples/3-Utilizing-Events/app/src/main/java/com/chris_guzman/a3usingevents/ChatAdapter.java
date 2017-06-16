@@ -9,9 +9,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.nexmo.sdk.conversation.client.Conversation;
 import com.nexmo.sdk.conversation.client.Message;
-import com.nexmo.sdk.conversation.client.SeenReceipt;
 import com.nexmo.sdk.conversation.client.Text;
 import com.nexmo.sdk.conversation.client.event.CompletionListeners.MarkedAsSeenListener;
 import com.nexmo.sdk.conversation.client.event.EventType;
@@ -85,8 +83,8 @@ class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder> {
 
         public ViewHolder(View itemView) {
             super(itemView);
-            text = (TextView)itemView.findViewById(R.id.item_chat_txt);
-            seenIcon = (ImageView)itemView.findViewById(R.id.item_chat_seen_img);
+            text = (TextView) itemView.findViewById(R.id.item_chat_txt);
+            seenIcon = (ImageView) itemView.findViewById(R.id.item_chat_seen_img);
         }
     }
 }

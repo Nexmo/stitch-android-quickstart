@@ -1,7 +1,5 @@
 ## Getting Started with the Nexmo Conversation Android SDK
 
-The Nexmo Conversation API enables you to build conversation features where communication can take place across multiple mediums including IP Messaging, PSTN Voice, SMS and WebRTC Audio and Video. The context of the conversations is maintained though each communication event taking place within a conversation, no matter the medium.
-
 In this getting started guide we'll demonstrate how to build a simple conversation app with IP messaging using the Nexmo Conversation Android SDK. In doing so we'll touch on concepts such as Nexmo Applications, JWTs, Users, Conversations and conversation Members.
 
 ### Before you begin
@@ -59,7 +57,7 @@ curl -X POST https://api.nexmo.com/beta/users\
 Generate a JWT for the user and take a note of it.
 
 ```bash
-nexmo jwt:generate ./private.key sub=adam acl='{"paths": { "/**": {  } } }' application_id=YOUR_APP_ID
+nexmo jwt:generate ./private.key sub=adam acl='{"paths": {"/v1/sessions/**": {}, "/v1/users/**": {}, "/v1/conversations/**": {}}}'  application_id=YOUR_APP_ID
 ```
 
 ### Create the Android App
@@ -72,7 +70,7 @@ In the `build.gradle` file we'll add the Nexmo Conversation Android SDK.
 //app/build.gradle
 dependencies {
 ...
-  compile 'com.nexmo:conversation:0.6.1'
+  compile 'com.nexmo:conversation:0.6.2'
   compile 'com.android.support:appcompat-v7:25.3.1'
 ...
 }

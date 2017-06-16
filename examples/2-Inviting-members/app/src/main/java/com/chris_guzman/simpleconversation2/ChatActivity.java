@@ -21,7 +21,6 @@ import com.nexmo.sdk.conversation.client.Message;
 import com.nexmo.sdk.conversation.client.Text;
 import com.nexmo.sdk.conversation.client.event.CompletionListeners.EventSendListener;
 import com.nexmo.sdk.conversation.client.event.CompletionListeners.InviteSendListener;
-import com.nexmo.sdk.conversation.client.event.CompletionListeners.JoinListener;
 import com.nexmo.sdk.conversation.client.event.MessageListener;
 
 public class ChatActivity extends AppCompatActivity {
@@ -50,7 +49,7 @@ public class ChatActivity extends AppCompatActivity {
             }
         });
 
-        conversationClient = ((ConversationClientApplication) getApplication()).getConversationClient() ;
+        conversationClient = ((ConversationClientApplication) getApplication()).getConversationClient();
 
         Intent intent = getIntent();
         String conversationId = intent.getStringExtra("CONVERSATION_ID");

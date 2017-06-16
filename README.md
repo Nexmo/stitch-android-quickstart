@@ -1,34 +1,59 @@
-# Nexmo Conversation SDK for Android Beta EA
+# Nexmo Conversation SDK for Android Beta
 
-TODO: Basic overview of this EA with a focus on the Android SDK.
-TODO: Talk about the features and use cases.
+This is the Android SDK for Nexmo's Conversation API. Read more about:
+- [The Conversation API](#about-the-conversation-api)
+- [Participating in the Early Adopter program](#participating-in-the-early-adopter-program)
+- [Trying out the quickstart examples](#try-out-the-quickstart-examples)
+- [Viewing the SDK API Reference docs](#sdk-api-reference-docs)
+- [Checking out the additional resources](#additional-resources)
 
 ## About the Conversation API
 
-TODO: General overview of the plans for the Conversation API
+The Nexmo Conversation API enables you to build conversation features where communication can take place across multiple mediums including IP Messaging, PSTN Voice, SMS and WebRTC Audio and Video. The context of the conversations is maintained though each communication event taking place within a conversation, no matter the medium.
 
-## How to participate in the EA
+The Conversation API targets two main use cases:
 
-* Make sure your team members are on the private github team so they have access to the docs and can view the SDK
-* Provide us with ask questions, provide feedback and report problems by [creating an issue](https://github.com/Nexmo/conversation-android-quickstart/issues/new)
-* Join the [Nexmo community slack](http://nexmo-community-invite.herokuapp.com/) and ping @chris or @leggetter for access to the private Conversation API channels
+1. In-app Messaging to Contact Center Desktop: Enables enterprises to offer customer service within their own branded mobile apps, while the contact center agents engage via their existing CRM desktop applications.
 
-## Get Started
+2. In-app Messaging Person to Person: Enables marketplaces and other businesses to offer an in-app messaging experience between buyers and sellers or other users.
 
-* [1. A simple conversation](examples/1-simple-conversation/)
+Currently the Conversation API offers basic IP messaging with the following features:
+- Conversation creation and management
+- Sending and receiving text
+- Member invite management
+- Cache support
+- Typing indicators
+- Message sent, delivered and read receipts
 
-## Try out the other examples
+Upcoming features will include:
+- Image support
+- Push notifications
+- Voice support
 
-* [2. Inviting members](examples/2-Inviting-members)
-* [3. Utilizing events](examples/3-utilizing-events)
+## Participating in the Early Adopter program
 
-## API Reference docs
+The Early Adopter (EA) program will take place from June 2017 to September 2017 with a focus on the IP messaging capabilities. During this extended Beta program there will be frequent releases with new features and bug fixes based on your feedback. Changes will be communicated with each release outlying what changed. During the Beta it is possible (and probable) that there shall be breaking changes to the SDK and API but these will be explicitly communicated beforehand.
 
-The [Nexmo Conversation Android SDK API Reference docs](https://conversation-android-docs.herokuapp.com/) are available online. You can also view the docs from within Android Studio. The docs are authorized 
+If your team members require access to the docs or SDK repos contact [devrel@nexmo.com](mailto:devrel@nexmo.com).
+If you want communicate with us during the EA program you can:
+* Join the [Nexmo community slack](http://nexmo-community-invite.herokuapp.com/) and ask @chris, @laka or @leggetter for access to the private [#conversation-ea](https://nexmo-community.slack.com/messages/G5V788WHJ/) channel
+* Ask questions, provide feedback and report problems by [creating an issue](https://github.com/Nexmo/conversation-android-quickstart/issues/new)
+* Email [devrel@nexmo.com](mailto:devrel@nexmo.com) directly
 
-## Resources
+## Try out the quickstart examples
+
+* [Simple conversation](examples/1-simple-conversation/)
+* [Inviting members](examples/2-Inviting-members)
+* [Utilizing events](examples/3-Utilizing-events)
+
+## SDK API Reference docs
+
+The [Nexmo Conversation Android SDK API Reference docs](https://conversation-android-docs.herokuapp.com/) are available online. You can also view the docs from within Android Studio. If you do not have access to the docs, please contact [devrel@nexmo.com](mailto:devrel@nexmo.com)
+
+## Additional Resources
 
 * [Nexmo CLI](https://github.com/nexmo/nexmo-cli)
-* [Nexmo Conversation iOS SDK](https://github.com/nexmoinc/conversation-ios-sdk)
-* [Nexmo Conversation JS SDK](https://github.com/nexmoinc/conversation-js-sdk)
-
+* [Nexmo Conversation iOS SDK](https://github.com/nexmo/conversation-ios-sdk)
+* [Nexmo Conversation iOS Quickstart](https://github.com/nexmo/conversation-ios-quickstart)
+* [Nexmo Conversation JS SDK](https://github.com/nexmo/conversation-js-sdk)
+* [Nexmo Conversation JS Quickstart](https://github.com/nexmo/conversation-js-quickstart)

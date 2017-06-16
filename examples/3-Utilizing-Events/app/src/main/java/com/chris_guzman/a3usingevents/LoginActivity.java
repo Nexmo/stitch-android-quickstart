@@ -193,7 +193,8 @@ public class LoginActivity extends AppCompatActivity {
                         showCreateConversationDialog();
                     }
                 })
-                .setNegativeButton("Dismiss", null);;
+                .setNegativeButton("Dismiss", null);
+        ;
 
         runOnUiThread(new Runnable() {
             @Override
@@ -236,13 +237,13 @@ public class LoginActivity extends AppCompatActivity {
                 conversation.join(new JoinListener() {
                     @Override
                     public void onConversationJoined(Member member) {
-                        logAndShow( "Created and joined Conversation: " + conversation.getDisplayName());
+                        logAndShow("Created and joined Conversation: " + conversation.getDisplayName());
                         goToConversation(conversation);
                     }
 
                     @Override
                     public void onError(int errCode, String errMessage) {
-                        logAndShow( "Error joining conversation: " + errMessage);
+                        logAndShow("Error joining conversation: " + errMessage);
                     }
                 });
             }

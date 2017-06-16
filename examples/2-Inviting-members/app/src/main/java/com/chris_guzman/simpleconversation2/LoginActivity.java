@@ -35,6 +35,7 @@ public class LoginActivity extends AppCompatActivity {
     private Button chatBtn;
     private ConversationClient conversationClient;
     private TextView loginTxt;
+    private Button logoutBtn;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,12 +46,19 @@ public class LoginActivity extends AppCompatActivity {
 
         loginTxt = (TextView) findViewById(R.id.login_text);
         loginBtn = (Button) findViewById(R.id.login);
+        logoutBtn = (Button) findViewById(R.id.logout);
         chatBtn = (Button) findViewById(R.id.chat);
 
         loginBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 login();
+            }
+        });
+        logoutBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                logout();
             }
         });
         chatBtn.setOnClickListener(new View.OnClickListener() {
@@ -178,7 +186,7 @@ public class LoginActivity extends AppCompatActivity {
                         showCreateConversationDialog();
                     }
                 })
-                .setNegativeButton("Dismiss", null);;
+                .setNegativeButton("Dismiss", null);
 
         runOnUiThread(new Runnable() {
             @Override
@@ -221,13 +229,13 @@ public class LoginActivity extends AppCompatActivity {
                 conversation.join(new JoinListener() {
                     @Override
                     public void onConversationJoined(Member member) {
-                        logAndShow( "Created and joined Conversation: " + conversation.getDisplayName());
+                        logAndShow("Created and joined Conversation: " + conversation.getDisplayName());
                         goToConversation(conversation);
                     }
 
                     @Override
                     public void onError(int errCode, String errMessage) {
-                        logAndShow( "Error joining conversation: " + errMessage);
+                        logAndShow("Error joining conversation: " + errMessage);
                     }
                 });
             }
@@ -283,6 +291,4 @@ public class LoginActivity extends AppCompatActivity {
             }
         });
     }
-
-
 }
