@@ -49,7 +49,7 @@ public class ChatActivity extends AppCompatActivity {
             }
         });
 
-        conversationClient = ((ConversationClientApplication) getApplication()).getConversationClient() ;
+        conversationClient = ((ConversationClientApplication) getApplication()).getConversationClient();
 
         Intent intent = getIntent();
         String conversationId = intent.getStringExtra("CONVERSATION_ID");
@@ -83,16 +83,16 @@ public class ChatActivity extends AppCompatActivity {
     }
 
     private void inviteUser() {
-        String otherUser = (conversationClient.getLoggedInUser().getName().equals("adam") ? "jamie" : "adam");
+        final String otherUser = (conversationClient.getLoggedInUser().getName().equals("tom") ? "jerry" : "tom");
         convo.invite(otherUser, new InviteSendListener() {
             @Override
-            public void onInviteSent(Conversation conversation, Member invitedMember) {
-                Log.d(TAG, "onInviteSent: ");
+            public void onInviteSent(Member invitedMember) {
+                logAndShow("Invite sent to: " + invitedMember.getName());
             }
 
             @Override
             public void onError(int errCode, String errMessage) {
-                Log.d(TAG, "onInviteSent onError: ");
+                logAndShow("Error sending invite: " + errMessage);
             }
         });
     }
@@ -100,13 +100,18 @@ public class ChatActivity extends AppCompatActivity {
     private void sendMessage() {
         convo.sendText(msgEditTxt.getText().toString(), new EventSendListener() {
             @Override
-            public void onSent(Conversation conversation, Message message) {
-                //intentionally left blank
+            public void onSent(Message message) {
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        msgEditTxt.setText(null);
+                    }
+                });
             }
 
             @Override
             public void onError(int errCode, String errMessage) {
-                logAndShow("onMessageSent Error. Code " + errCode + " Message: " + errMessage);
+                logAndShow("Error sending message: " + errMessage);
             }
         });
     }
@@ -114,33 +119,33 @@ public class ChatActivity extends AppCompatActivity {
     private void addListener() {
         messageListener = new MessageListener() {
             @Override
-            public void onTextReceived(Conversation conversation, Text message) {
+            public void onTextReceived(Text message) {
                 showMessage(message);
             }
 
             @Override
-            public void onTextDeleted(Conversation conversation, Text message, Member member) {
+            public void onTextDeleted(Text message, Member member) {
 
             }
 
             @Override
-            public void onImageReceived(Conversation conversation, Image image) {
+            public void onImageReceived(Image image) {
 
             }
 
             @Override
-            public void onImageDeleted(Conversation conversation, Image message, Member member) {
+            public void onImageDeleted(Image message, Member member) {
 
             }
 
             @Override
-            public void onImageDownloaded(Conversation conversation, Image image) {
+            public void onImageDownloaded(Image image) {
 
             }
 
             @Override
             public void onError(int errCode, String errMessage) {
-                Log.d(TAG, "onError: " + errMessage + errCode);
+                logAndShow("onError: " + errMessage + errCode);
             }
         };
 
