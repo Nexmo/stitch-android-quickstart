@@ -11,13 +11,8 @@ This is the Android SDK for Nexmo's Conversation API. Read more about:
 
 The Nexmo Conversation API enables you to build conversation features where communication can take place across multiple mediums including IP Messaging, PSTN Voice, SMS and WebRTC Audio and Video. The context of the conversations is maintained though each communication event taking place within a conversation, no matter the medium.
 
-The Conversation API targets two main use cases:
-
-1. In-app Messaging to Contact Center Desktop: Enables enterprises to offer customer service within their own branded mobile apps, while the contact center agents engage via their existing CRM desktop applications.
-
-2. In-app Messaging Person to Person: Enables marketplaces and other businesses to offer an in-app messaging experience between buyers and sellers or other users.
-
 Currently the Conversation API offers basic IP messaging with the following features:
+
 - Conversation creation and management
 - Sending and receiving text
 - Member invite management
@@ -45,7 +40,7 @@ If you want communicate with us during the EA program you can:
 * [Simple conversation](docs/1-simple-conversation.md)
 * [Inviting members](docs/2-inviting-members.md)
 
-More coming soon
+More coming soon.
 
 You can also find the completed examples in the [examples directory](examples).
 
