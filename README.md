@@ -35,16 +35,19 @@ Upcoming features will include:
 The Early Adopter (EA) program will take place from June 2017 to September 2017 with a focus on the IP messaging capabilities. During this extended Beta program there will be frequent releases with new features and bug fixes based on your feedback. Changes will be communicated with each release outlying what changed. During the Beta it is possible (and probable) that there shall be breaking changes to the SDK and API but these will be explicitly communicated beforehand.
 
 If your team members require access to the docs or SDK repos contact [devrel@nexmo.com](mailto:devrel@nexmo.com).
+* Ask questions, provide feedback and report problems by [creating an issue](https://github.com/Nexmo/conversation-android-quickstart/issues/new)
 If you want communicate with us during the EA program you can:
 * Join the [Nexmo community slack](http://nexmo-community-invite.herokuapp.com/) and ask @chris, @laka or @leggetter for access to the private [#conversation-ea](https://nexmo-community.slack.com/messages/G5V788WHJ/) channel
-* Ask questions, provide feedback and report problems by [creating an issue](https://github.com/Nexmo/conversation-android-quickstart/issues/new)
 * Email [devrel@nexmo.com](mailto:devrel@nexmo.com) directly
 
-## Try out the quickstart examples
+## Run through the quickstart guides
 
-* [Simple conversation](examples/1-simple-conversation/)
-* [Inviting members](examples/2-Inviting-members)
-* [Utilizing events](examples/3-Utilizing-events)
+* [Simple conversation](docs/1-simple-conversation.md)
+* [Inviting members](docs/2-inviting-members.md)
+
+More coming soon
+
+You can also find the completed examples in the [examples directory](examples).
 
 ## SDK API Reference docs
 
