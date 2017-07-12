@@ -28,7 +28,7 @@ public class ChatActivity extends AppCompatActivity {
     private Button sendMsgBtn;
 
     private ConversationClient conversationClient;
-    private Conversation convo;
+    private Conversation conversation;
     private MessageListener messageListener;
 
     @Override
@@ -51,7 +51,7 @@ public class ChatActivity extends AppCompatActivity {
 
         Intent intent = getIntent();
         String conversationId = intent.getStringExtra("CONVERSATION-ID");
-        convo = conversationClient.getConversation(conversationId);
+        conversation = conversationClient.getConversation(conversationId);
     }
 
     @Override
@@ -63,11 +63,11 @@ public class ChatActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        convo.removeMessageListener(messageListener);
+        conversation.removeMessageListener(messageListener);
     }
 
     private void sendMessage() {
-        convo.sendText(msgEditTxt.getText().toString(), new EventSendListener() {
+        conversation.sendText(msgEditTxt.getText().toString(), new EventSendListener() {
             @Override
             public void onSent(Message message) {
                 if (message.getType().equals(EventType.TEXT)) {
@@ -114,7 +114,7 @@ public class ChatActivity extends AppCompatActivity {
                 //intentionally left blank
             }
         };
-        convo.addMessageListener(messageListener);
+        conversation.addMessageListener(messageListener);
     }
 
     private void showMessage(final Text message) {

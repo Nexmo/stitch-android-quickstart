@@ -9,26 +9,19 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.nexmo.sdk.conversation.client.Conversation;
 import com.nexmo.sdk.conversation.client.ConversationClient;
-import com.nexmo.sdk.conversation.client.Member;
 import com.nexmo.sdk.conversation.client.User;
-import com.nexmo.sdk.conversation.client.event.CompletionListeners.ConversationCreateListener;
-import com.nexmo.sdk.conversation.client.event.CompletionListeners.JoinListener;
 import com.nexmo.sdk.conversation.client.event.CompletionListeners.LoginListener;
-import com.nexmo.sdk.conversation.client.event.CompletionListeners.LogoutListener;
-
-import java.util.Date;
 
 public class LoginActivity extends AppCompatActivity {
     private final String TAG = LoginActivity.class.getSimpleName();
-    private String userJwt;
+    private String CONVERSATION_ID;
+    private String USER_JWT;
 
     private ConversationClient conversationClient;
     private TextView loginTxt;
     private Button loginBtn;
     private Button chatBtn;
-    private Button logoutBtn;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,14 +34,6 @@ public class LoginActivity extends AppCompatActivity {
         loginTxt = (TextView) findViewById(R.id.login_text);
         loginBtn = (Button) findViewById(R.id.login);
         chatBtn = (Button) findViewById(R.id.chat);
-        logoutBtn = (Button) findViewById(R.id.logout);
-
-        logoutBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                logout();
-            }
-        });
 
         loginBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -59,14 +44,20 @@ public class LoginActivity extends AppCompatActivity {
         chatBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                createConversation();
+                goToChatActivity();
             }
         });
     }
 
+    private String authenticate() {
+        return USER_JWT;
+    }
+
     private void login() {
         loginTxt.setText("Logging in...");
-        conversationClient.login(userJwt, new LoginListener() {
+
+        String userToken = authenticate();
+        conversationClient.login(userToken, new LoginListener() {
             @Override
             public void onLogin(final User user) {
                 showLoginSuccess(user);
@@ -110,57 +101,14 @@ public class LoginActivity extends AppCompatActivity {
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                loginTxt.setText("Logged in as " + user.getName() + "\nStart a new conversation");
+                loginTxt.setText("Logged in as " + user.getName() + "\nGo to a conversation!");
             }
         });
     }
 
-    private void logout() {
-        conversationClient.logout(new LogoutListener() {
-            @Override
-            public void onLogout(User user) {
-                logAndShow(user.getName() + " logged out");
-            }
-
-            @Override
-            public void onError(int errCode, String errMessage) {
-                logAndShow("Error logging out: " + errMessage);
-            }
-        });
-    }
-
-    private void createConversation() {
-        conversationClient.newConversation(new Date().toString(), new ConversationCreateListener() {
-            @Override
-            public void onConversationCreated(Conversation conversation) {
-                logAndShow("Conversation created: " + conversation.getDisplayName());
-                joinConversation(conversation);
-            }
-
-            @Override
-            public void onError(int errCode, String errMessage) {
-                logAndShow("Error creating conversation: " + errMessage);
-            }
-        });
-    }
-
-    private void joinConversation(final Conversation conversation) {
-        conversation.join(new JoinListener() {
-            @Override
-            public void onConversationJoined(Member member) {
-                goToChatActivity(conversation);
-            }
-
-            @Override
-            public void onError(int errCode, String errMessage) {
-                logAndShow("Error joining conversation: " + errMessage);
-            }
-        });
-    }
-
-    private void goToChatActivity(Conversation conversation) {
+    private void goToChatActivity() {
         Intent intent = new Intent(LoginActivity.this, ChatActivity.class);
-        intent.putExtra("CONVERSATION-ID", conversation.getConversationId());
+        intent.putExtra("CONVERSATION-ID", CONVERSATION_ID);
         startActivity(intent);
     }
 
