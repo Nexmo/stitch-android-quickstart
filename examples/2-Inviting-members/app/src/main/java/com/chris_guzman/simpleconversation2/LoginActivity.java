@@ -17,11 +17,9 @@ import com.nexmo.sdk.conversation.client.Conversation;
 import com.nexmo.sdk.conversation.client.ConversationClient;
 import com.nexmo.sdk.conversation.client.Member;
 import com.nexmo.sdk.conversation.client.User;
-import com.nexmo.sdk.conversation.client.event.CompletionListeners.ConversationCreateListener;
 import com.nexmo.sdk.conversation.client.event.CompletionListeners.ConversationListListener;
 import com.nexmo.sdk.conversation.client.event.CompletionListeners.JoinListener;
 import com.nexmo.sdk.conversation.client.event.CompletionListeners.LoginListener;
-import com.nexmo.sdk.conversation.client.event.CompletionListeners.LogoutListener;
 import com.nexmo.sdk.conversation.client.event.ConversationInvitedListener;
 
 import java.util.ArrayList;
@@ -29,13 +27,13 @@ import java.util.List;
 
 public class LoginActivity extends AppCompatActivity {
     private static final String TAG = LoginActivity.class.getSimpleName();
-    private String tomToken;
-    private String jerryToken;
+    private String USER_JWT;
+    private String SECOND_USER_JWT;
+
     private Button loginBtn;
     private Button chatBtn;
     private ConversationClient conversationClient;
     private TextView loginTxt;
-    private Button logoutBtn;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,19 +44,12 @@ public class LoginActivity extends AppCompatActivity {
 
         loginTxt = (TextView) findViewById(R.id.login_text);
         loginBtn = (Button) findViewById(R.id.login);
-        logoutBtn = (Button) findViewById(R.id.logout);
         chatBtn = (Button) findViewById(R.id.chat);
 
         loginBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 login();
-            }
-        });
-        logoutBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                logout();
             }
         });
         chatBtn.setOnClickListener(new View.OnClickListener() {
@@ -69,33 +60,27 @@ public class LoginActivity extends AppCompatActivity {
         });
     }
 
-    private void logout() {
-        conversationClient.logout(new LogoutListener() {
-            @Override
-            public void onLogout(User user) {
-                logAndShow(user.getName() + " logged out");
-            }
-
-            @Override
-            public void onError(int errCode, String errMessage) {
-                logAndShow("Error logging out: " + errMessage);
-            }
-        });
+    private String authenticate(String username) {
+        return username.toLowerCase().equals("jamie") ? USER_JWT : SECOND_USER_JWT;
     }
 
     private void login() {
+        final EditText input = new EditText(LoginActivity.this);
         final AlertDialog.Builder dialog = new AlertDialog.Builder(LoginActivity.this)
-                .setTitle("Which user are you logging in as?")
-                .setItems(new String[]{"tom", "jerry"}, new DialogInterface.OnClickListener() {
+                .setTitle("Enter your username")
+                .setPositiveButton("Login", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        if (which == 0) {
-                            loginAsUser(tomToken);
-                        } else {
-                            loginAsUser(jerryToken);
-                        }
+                        String userToken = authenticate(input.getText().toString());
+                        loginAsUser(userToken);
                     }
                 });
+
+        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.MATCH_PARENT);
+        input.setLayoutParams(lp);
+        dialog.setView(input);
 
         runOnUiThread(new Runnable() {
             @Override
@@ -155,7 +140,7 @@ public class LoginActivity extends AppCompatActivity {
                 if (conversationList.size() > 0) {
                     showConversationList(conversationList);
                 } else {
-                    showCreateConversationDialog();
+                    logAndShow("You are not a member of any conversations");
                 }
             }
 
@@ -173,79 +158,20 @@ public class LoginActivity extends AppCompatActivity {
         }
 
         final AlertDialog.Builder dialog = new AlertDialog.Builder(LoginActivity.this)
-                .setTitle("Enter or create a conversation")
+                .setTitle("Choose a conversation")
                 .setItems(conversationNames.toArray(new CharSequence[conversationNames.size()]), new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         goToConversation(conversationList.get(which));
                     }
-                })
-                .setPositiveButton("New conversation", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        showCreateConversationDialog();
-                    }
-                })
-                .setNegativeButton("Dismiss", null);
-
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                dialog.show();
-            }
-        });
-    }
-
-    private void showCreateConversationDialog() {
-        final EditText input = new EditText(LoginActivity.this);
-        final AlertDialog.Builder dialog = new AlertDialog.Builder(LoginActivity.this)
-                .setTitle("Enter conversation name")
-                .setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        createConversation(input.getText().toString());
-                    }
-                })
-                .setNegativeButton("Dismiss", null);
-
-        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT,
-                LinearLayout.LayoutParams.MATCH_PARENT);
-        input.setLayoutParams(lp);
-        dialog.setView(input);
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                dialog.show();
-            }
-        });
-
-    }
-
-    private void createConversation(String name) {
-        conversationClient.newConversation(name, new ConversationCreateListener() {
-            @Override
-            public void onConversationCreated(final Conversation conversation) {
-                conversation.join(new JoinListener() {
-                    @Override
-                    public void onConversationJoined(Member member) {
-                        logAndShow("Created and joined Conversation: " + conversation.getDisplayName());
-                        goToConversation(conversation);
-                    }
-
-                    @Override
-                    public void onError(int errCode, String errMessage) {
-                        logAndShow("Error joining conversation: " + errMessage);
-                    }
                 });
-            }
 
+        runOnUiThread(new Runnable() {
             @Override
-            public void onError(int errCode, String errMessage) {
-                logAndShow("Error creating conversation: " + errMessage);
+            public void run() {
+                dialog.show();
             }
         });
-
     }
 
     private void goToConversation(final Conversation conversation) {

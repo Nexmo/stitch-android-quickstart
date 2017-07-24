@@ -4,9 +4,6 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -15,13 +12,12 @@ import android.widget.Toast;
 
 import com.nexmo.sdk.conversation.client.Conversation;
 import com.nexmo.sdk.conversation.client.ConversationClient;
+import com.nexmo.sdk.conversation.client.Event;
 import com.nexmo.sdk.conversation.client.Image;
 import com.nexmo.sdk.conversation.client.Member;
-import com.nexmo.sdk.conversation.client.Message;
 import com.nexmo.sdk.conversation.client.Text;
 import com.nexmo.sdk.conversation.client.event.CompletionListeners.EventSendListener;
-import com.nexmo.sdk.conversation.client.event.CompletionListeners.InviteSendListener;
-import com.nexmo.sdk.conversation.client.event.MessageListener;
+import com.nexmo.sdk.conversation.client.event.EventListener;
 
 public class ChatActivity extends AppCompatActivity {
     private static final String TAG = ChatActivity.class.getSimpleName();
@@ -31,8 +27,8 @@ public class ChatActivity extends AppCompatActivity {
     private Button sendMsgBtn;
 
     private ConversationClient conversationClient;
-    private Conversation convo;
-    private MessageListener messageListener;
+    private Conversation conversation;
+    private EventListener eventListener;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,7 +49,7 @@ public class ChatActivity extends AppCompatActivity {
 
         Intent intent = getIntent();
         String conversationId = intent.getStringExtra("CONVERSATION_ID");
-        convo = conversationClient.getConversation(conversationId);
+        conversation = conversationClient.getConversation(conversationId);
 
         addListener();
     }
@@ -61,46 +57,13 @@ public class ChatActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        convo.removeMessageListener(messageListener);
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.chat_menu, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.invite:
-                inviteUser();
-                return true;
-            default:
-                return super.onOptionsItemSelected(item);
-        }
-    }
-
-    private void inviteUser() {
-        final String otherUser = (conversationClient.getLoggedInUser().getName().equals("tom") ? "jerry" : "tom");
-        convo.invite(otherUser, new InviteSendListener() {
-            @Override
-            public void onInviteSent(Member invitedMember) {
-                logAndShow("Invite sent to: " + invitedMember.getName());
-            }
-
-            @Override
-            public void onError(int errCode, String errMessage) {
-                logAndShow("Error sending invite: " + errMessage);
-            }
-        });
+        conversation.removeEventListener(eventListener);
     }
 
     private void sendMessage() {
-        convo.sendText(msgEditTxt.getText().toString(), new EventSendListener() {
+        conversation.sendText(msgEditTxt.getText().toString(), new EventSendListener() {
             @Override
-            public void onSent(Message message) {
+            public void onSent(Event event) {
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
@@ -117,7 +80,7 @@ public class ChatActivity extends AppCompatActivity {
     }
 
     private void addListener() {
-        messageListener = new MessageListener() {
+        eventListener = new EventListener() {
             @Override
             public void onTextReceived(Text message) {
                 showMessage(message);
@@ -149,7 +112,7 @@ public class ChatActivity extends AppCompatActivity {
             }
         };
 
-        convo.addMessageListener(messageListener);
+        conversation.addEventListener(eventListener);
     }
 
     private void showMessage(final Text message) {

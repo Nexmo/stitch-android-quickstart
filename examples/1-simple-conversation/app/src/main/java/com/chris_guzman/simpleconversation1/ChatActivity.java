@@ -12,13 +12,13 @@ import android.widget.Toast;
 
 import com.nexmo.sdk.conversation.client.Conversation;
 import com.nexmo.sdk.conversation.client.ConversationClient;
+import com.nexmo.sdk.conversation.client.Event;
 import com.nexmo.sdk.conversation.client.Image;
 import com.nexmo.sdk.conversation.client.Member;
-import com.nexmo.sdk.conversation.client.Message;
 import com.nexmo.sdk.conversation.client.Text;
 import com.nexmo.sdk.conversation.client.event.CompletionListeners.EventSendListener;
+import com.nexmo.sdk.conversation.client.event.EventListener;
 import com.nexmo.sdk.conversation.client.event.EventType;
-import com.nexmo.sdk.conversation.client.event.MessageListener;
 
 public class ChatActivity extends AppCompatActivity {
     private final String TAG = ChatActivity.this.getClass().getSimpleName();
@@ -29,7 +29,7 @@ public class ChatActivity extends AppCompatActivity {
 
     private ConversationClient conversationClient;
     private Conversation conversation;
-    private MessageListener messageListener;
+    private EventListener eventListener;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -63,15 +63,15 @@ public class ChatActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        conversation.removeMessageListener(messageListener);
+        conversation.removeEventListener(eventListener);
     }
 
     private void sendMessage() {
         conversation.sendText(msgEditTxt.getText().toString(), new EventSendListener() {
             @Override
-            public void onSent(Message message) {
-                if (message.getType().equals(EventType.TEXT)) {
-                    Log.d(TAG, "onSent: " + ((Text) message).getText());
+            public void onSent(Event event) {
+                if (event.getType().equals(EventType.TEXT)) {
+                    Log.d(TAG, "onSent: " + ((Text) event).getText());
                 }
             }
 
@@ -83,10 +83,10 @@ public class ChatActivity extends AppCompatActivity {
     }
 
     private void addListener() {
-        messageListener = new MessageListener() {
+        eventListener = new EventListener() {
             @Override
             public void onError(int errCode, String errMessage) {
-                logAndShow("Error adding MessageListener: " + errMessage);
+                logAndShow("Error adding EventListener: " + errMessage);
             }
 
             @Override
@@ -114,7 +114,7 @@ public class ChatActivity extends AppCompatActivity {
                 //intentionally left blank
             }
         };
-        conversation.addMessageListener(messageListener);
+        conversation.addEventListener(eventListener);
     }
 
     private void showMessage(final Text message) {

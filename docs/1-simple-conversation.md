@@ -464,7 +464,7 @@ public class ChatActivity extends AppCompatActivity {
 
   private ConversationClient conversationClient;
   private Conversation conversation;
-  private MessageListener messageListener;
+  private EventListener eventListener;
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -512,9 +512,9 @@ In the `EventSendListener` we'll get two call backs: `onSent()` and `onError()`.
 private void sendMessage() {
     conversation.sendText(msgEditTxt.getText().toString(), new EventSendListener() {
         @Override
-        public void onSent(Message message) {
-            if (message.getType().equals(EventType.TEXT)) {
-                Log.d(TAG, "onSent: " + ((Text) message).getText());
+        public void onSent(Event event) {
+            if (event.getType().equals(EventType.TEXT)) {
+                Log.d(TAG, "onSent: " + ((Text) event).getText());
             }
         }
 
@@ -528,15 +528,15 @@ private void sendMessage() {
 
 ### 2.9 - Receiving `text` Events
 
-We want to know when text messages are being received so we need to add a `TextListener` to the conversation. We can do this like so:
+We want to know when text messages are being received so we need to add a `EventListener` to the conversation. We can do this like so:
 
 ```java
 //ChatActivity.java
 private void addListener() {
-    messageListener = new MessageListener() {
+    eventListener = new EventListener() {
         @Override
         public void onError(int errCode, String errMessage) {
-            logAndShow("Error adding MessageListener: " + errMessage);
+            logAndShow("Error adding EventListener: " + errMessage);
         }
 
         @Override
@@ -564,7 +564,7 @@ private void addListener() {
             //intentionally left blank
         }
     };
-    conversation.addMessageListener(messageListener);
+    conversation.addEventListener(eventListener);
 }
 
 private void showMessage(final Text message) {
@@ -579,14 +579,14 @@ private void showMessage(final Text message) {
 }
 ```
 
-Calling `addMessageListener` on a Conversation allows us to add callbacks when a message is sent. The `addMessageListener` method takes a `new MessageListener()` as an argument.
-`MessageListener` has a few callbacks, but we'll just focus about the `onTextReceived` and `onError` methods. When that is `onTextReceived` is fired we'll call our `showMessage()` method. If an error occurs, we'll log it out.
+Calling `addEventListener` on a Conversation allows us to add callbacks when a message is received. The `addEventListener` method takes a `new EventListener()` as an argument.
+`EventListener` has a few callbacks, but we'll just focus about the `onTextReceived` and `onError` methods. When that is `onTextReceived` is fired we'll call our `showMessage()` method. If an error occurs, we'll log it out.
 
 `showMessage()` removes the text from the `msgEditTxt` and appends the text from the `message` to our `chatTxt` along with any previous messages.
 
 ### 2.10 - Adding and removing listeners
 
-Finally, we need to add the `MessageListener` to the `Conversation` in order to send and receive messages. We should also remove the `MessageListener` when our Activity is winding down.
+Finally, we need to add the `EventListener` to the `Conversation` in order to send and receive messages. We should also remove the `EventListener` when our Activity is winding down.
 
 ```java
 //ChatActivity.java
@@ -599,7 +599,7 @@ protected void onResume() {
 @Override
 protected void onDestroy() {
     super.onDestroy();
-    conversation.removeMessageListener(messageListener);
+    conversation.removeEventListener(eventListener);
 }
 ```
 
