@@ -3,7 +3,7 @@
 This is the Android SDK for Nexmo's Conversation API. Read more about:
 - [The Conversation API](#about-the-conversation-api)
 - [Participating in the Early Adopter program](#participating-in-the-early-adopter-program)
-- [Trying out the quickstart examples](#try-out-the-quickstart-examples)
+- [Trying out the quickstart examples](#run-through-the-quickstart-guides)
 - [Viewing the SDK API Reference docs](#sdk-api-reference-docs)
 - [Checking out the additional resources](#additional-resources)
 
@@ -27,7 +27,7 @@ Upcoming features will include:
 
 ## Participating in the Early Adopter program
 
-The Early Adopter (EA) program will take place from June 2017 to September 2017 with a focus on the IP messaging capabilities. During this extended Beta program there will be frequent releases with new features and bug fixes based on your feedback. Changes will be communicated with each release outlying what changed. During the Beta it is possible (and probable) that there shall be breaking changes to the SDK and API but these will be explicitly communicated beforehand.
+The Early Adopter (EA) program will take place the next couple of months with a focus on the IP messaging capabilities. During this extended Beta program there will be frequent releases with new features and bug fixes based on your feedback. Changes will be communicated with each release outlying what changed. During the Beta it is possible (and probable) that there shall be breaking changes to the SDK and API but these will be explicitly communicated beforehand.
 
 If your team members require access to the docs or SDK repos contact [devrel@nexmo.com](mailto:devrel@nexmo.com).
 * Ask questions, provide feedback and report problems by [creating an issue](https://github.com/Nexmo/conversation-android-quickstart/issues/new)
@@ -39,19 +39,16 @@ If you want communicate with us during the EA program you can:
 
 * [Simple conversation](docs/1-simple-conversation.md)
 * [Inviting members](docs/2-inviting-members.md)
-
-More coming soon.
+* [Using events](docs/3-utilizing-events.md)
 
 You can also find the completed examples in the [examples directory](examples).
 
 ## SDK API Reference docs
 
-The [Nexmo Conversation Android SDK API Reference docs](https://conversation-android-docs.herokuapp.com/) are available online. You can also view the docs from within Android Studio. If you do not have access to the docs, please contact [devrel@nexmo.com](mailto:devrel@nexmo.com)
+The [Nexmo Conversation Android SDK API Reference docs](https://nexmo-conversation-docs.netlify.com/android) are available online. You can also view the docs from within Android Studio. If you do not have access to the docs, please contact [devrel@nexmo.com](mailto:devrel@nexmo.com)
 
 ## Additional Resources
 
 * [Nexmo CLI](https://github.com/nexmo/nexmo-cli)
-* [Nexmo Conversation iOS SDK](https://github.com/nexmo/conversation-ios-sdk)
-* [Nexmo Conversation iOS Quickstart](https://github.com/nexmo/conversation-ios-quickstart)
 * [Nexmo Conversation JS SDK](https://github.com/nexmo/conversation-js-sdk)
 * [Nexmo Conversation JS Quickstart](https://github.com/nexmo/conversation-js-quickstart)
