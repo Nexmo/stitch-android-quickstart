@@ -48,7 +48,7 @@ Application created: 2c59f277-5a88-4fab-88c4-919ee28xxxxx
 Private Key saved to: private.key
 ```
 
-The first item is the Application ID and the second is a private key that is used generate JWTs that are used to authenticate your interactions with Nexmo. You should take a note of it. We'll refer to this as `YOUR_APP_ID` later. The second value is a private key location. The private key is used to generate JWTs that are used to authenticate your interactions with Nexmo.
+The first item is the Application ID and the second is a private key that is used generate JWTs that are used to authenticate your interactions with Nexmo. You should take a note of it. We'll refer to this as `YOUR_APP_ID` later.
 
 
 ### 1.2 - Generate an Application JWT
