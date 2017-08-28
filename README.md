@@ -32,7 +32,7 @@ The Early Adopter (EA) program will take place the next couple of months with a 
 If your team members require access to the docs or SDK repos contact [devrel@nexmo.com](mailto:devrel@nexmo.com).
 * Ask questions, provide feedback and report problems by [creating an issue](https://github.com/Nexmo/conversation-android-quickstart/issues/new)
 If you want communicate with us during the EA program you can:
-* Join the [Nexmo community slack](http://nexmo-community-invite.herokuapp.com/) and ask @chris, @laka or @leggetter for access to the private [#conversation-ea](https://nexmo-community.slack.com/messages/G5V788WHJ/) channel
+* Join the [Nexmo community slack](https://developer.nexmo.com/community/slack) and ask @chris, @laka or @leggetter for access to the private [#conversation-ea](https://nexmo-community.slack.com/messages/G5V788WHJ/) channel
 * Email [devrel@nexmo.com](mailto:devrel@nexmo.com) directly
 
 ## Run through the quickstart guides
