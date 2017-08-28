@@ -45,7 +45,7 @@ You can also find the completed examples in the [examples directory](examples).
 
 ## SDK API Reference docs
 
-The [Nexmo Conversation Android SDK API Reference docs](https://nexmo-conversation-docs.netlify.com/android) are available online. You can also view the docs from within Android Studio. If you do not have access to the docs, please contact [devrel@nexmo.com](mailto:devrel@nexmo.com)
+The [Nexmo Conversation Android SDK API Reference docs](https://ea.developer.nexmo.com/sdk/conversation/android) are available online. You can also view the docs from within Android Studio. If you do not have access to the docs, please contact [devrel@nexmo.com](mailto:devrel@nexmo.com)
 
 ## Additional Resources
 
