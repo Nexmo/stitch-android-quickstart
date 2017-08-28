@@ -33,7 +33,7 @@ This guide will introduce you to the following concepts.
 
 _Note: The steps within this section can all be done dynamically via server-side logic. But in order to get the client-side functionality we're going to manually run through setup._
 
-### 1.1 - Create a Nexmo Application
+### 1.1 - Create a Nexmo 
 
 Create an application within the Nexmo platform.
 
@@ -44,7 +44,7 @@ $ nexmo app:create "Conversation Android App" http://example.com/answer http://e
 Nexmo Applications contain configuration for the application that you are building. The output of the above command will be something like this:
 
 ```bash
-Application created: 2c59f277-5a88-4fab-88c4-919ee28xxxxx
+Application created: aaaaaaaa-bbbb-cccc-dddd-0123456789ab
 Private Key saved to: private.key
 ```
 
