@@ -16,8 +16,9 @@ import com.nexmo.sdk.conversation.client.Event;
 import com.nexmo.sdk.conversation.client.Image;
 import com.nexmo.sdk.conversation.client.Member;
 import com.nexmo.sdk.conversation.client.Text;
-import com.nexmo.sdk.conversation.client.event.CompletionListeners.EventSendListener;
 import com.nexmo.sdk.conversation.client.event.EventListener;
+import com.nexmo.sdk.conversation.client.event.NexmoAPIError;
+import com.nexmo.sdk.conversation.client.event.RequestHandler;
 
 public class ChatActivity extends AppCompatActivity {
     private static final String TAG = ChatActivity.class.getSimpleName();
@@ -61,9 +62,9 @@ public class ChatActivity extends AppCompatActivity {
     }
 
     private void sendMessage() {
-        conversation.sendText(msgEditTxt.getText().toString(), new EventSendListener() {
+        conversation.sendText(msgEditTxt.getText().toString(), new RequestHandler<Event>() {
             @Override
-            public void onSent(Event event) {
+            public void onSuccess(Event result) {
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
@@ -73,14 +74,25 @@ public class ChatActivity extends AppCompatActivity {
             }
 
             @Override
-            public void onError(int errCode, String errMessage) {
-                logAndShow("Error sending message: " + errMessage);
+            public void onError(NexmoAPIError apiError) {
+                logAndShow("Error sending message: " + apiError.getMessage());
             }
         });
     }
 
     private void addListener() {
         eventListener = new EventListener() {
+            @Override
+            public void onSuccess(Object result) {
+
+            }
+
+            @Override
+            public void onError(NexmoAPIError apiError) {
+                logAndShow("onError: " + apiError.getMessage());
+
+            }
+
             @Override
             public void onTextReceived(Text message) {
                 showMessage(message);
@@ -104,11 +116,6 @@ public class ChatActivity extends AppCompatActivity {
             @Override
             public void onImageDownloaded(Image image) {
 
-            }
-
-            @Override
-            public void onError(int errCode, String errMessage) {
-                logAndShow("onError: " + errMessage + errCode);
             }
         };
 

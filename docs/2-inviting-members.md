@@ -120,9 +120,14 @@ private String authenticate(String username) {
 private void loginAsUser(String token) {
     conversationClient.login(token, new LoginListener() {
         @Override
-        public void onLogin(User user) {
+        public void onSuccess(User user) {
             showLoginSuccessAndAddInvitationListener(user);
             retrieveConversations();
+        }
+
+        @Override
+        public void onError(NexmoAPIError apiError) {
+            logAndShow("Login Error: " + apiError.getMessage());
         }
 
         @Override
@@ -152,13 +157,9 @@ private void loginAsUser(String token) {
                 }
             });
         }
-
-        @Override
-        public void onError(int errCode, String errMessage) {
-            logAndShow("Login Error: " + errMessage);
-        }
     });
 }
+
 ```
 
 We'll be running this device on two different devices (on an emulator or physical devices), so we'll first ask which user you're logging in as. When you enter a username we'll login with their JWT. We'll also add an invitation listener and retrieve any conversations that user is already a part of. Let's cover what the `showLoginSuccessAndAddInvitationListener(user)` method will do.
@@ -170,23 +171,21 @@ The next step is to update the login method to listen on the application with th
 ```java
 //LoginActivity.java
 private void showLoginSuccessAndAddInvitationListener(final User user) {
-    conversationClient.addConversationInvitedListener(new ConversationInvitedListener() {
+    conversationClient.invitedEvent().add(new ResultListener<Invitation>() {
         @Override
-        public void onConversationInvited(final Conversation conversation, Member invitedMember, String invitedByUsername) {
-            logAndShow(invitedByUsername + " invited you to their chat");
-            conversation.join(new JoinListener() {
+        public void onSuccess(Invitation result) {
+            logAndShow(result.getInvitedBy() + " invited you to their chat");
+            result.getConversation().join(new RequestHandler<Member>() {
                 @Override
-                public void onConversationJoined(Member member) {
-                    goToConversation(conversation);
+                public void onSuccess(Member result) {
+                    goToConversation(result.getConversation());
                 }
 
                 @Override
-                public void onError(int errCode, String errMessage) {
-                    logAndShow("Error joining conversation: " + errMessage);
+                public void onError(NexmoAPIError apiError) {
+                    logAndShow("Error joining conversation: " + apiError.getMessage());
                 }
             });
-
-
         }
     });
     runOnUiThread(new Runnable() {
@@ -198,7 +197,7 @@ private void showLoginSuccessAndAddInvitationListener(final User user) {
 }
 ```
 
-Calling `addConversationInvitedListener` on an instance of `ConversationClient` let's you respond to events where a user is invited to a conversation. In this example we're going to show that the user was invited, join the conversation, and then navigate to our `ChatActivity` to participate in that conversation. `addConversationInvitedListener` takes a `ConversationInvitedListener` object as a parameter. The `ConversationInvitedListener` has two callbacks: `onConversationInvited`, which means the user successfully received the invite, and an error callback.
+To respond to events where a user is invited to a conversation, you can add a `ResultListener<Invitation>` to a `invitedEvent()` on an instance of `ConversationClient`. In this example we're going to show that the user was invited, join the conversation, and then navigate to our `ChatActivity` to participate in that conversation. The `ResultListener<Invitation>` only has a success callback: `onSuccess`, which means the user successfully received the invite.
 
 Now let's go back to our `retrieveConversations()` method:
 
@@ -207,19 +206,19 @@ Now let's go back to our `retrieveConversations()` method:
 ```java
 //LoginActivity.java
 private void retrieveConversations() {
-    conversationClient.getConversations(new ConversationListListener() {
+    conversationClient.getConversations(new RequestHandler<List<Conversation>>() {
         @Override
-        public void onConversationList(List<Conversation> conversationList) {
-          if (conversationList.size() > 0) {
-            showConversationList(conversationList);
-          } else {
-            logAndShow("You are not a member of any conversations");
-          }
+        public void onSuccess(List<Conversation> conversationList) {
+            if (conversationList.size() > 0) {
+                showConversationList(conversationList);
+            } else {
+                logAndShow("You are not a member of any conversations");
+            }
         }
 
         @Override
-        public void onError(int errCode, String errMessage) {
-            logAndShow("Error listing conversations: " + errMessage);
+        public void onError(NexmoAPIError apiError) {
+            logAndShow("Error listing conversations: " + apiError.getMessage());
         }
     });
 }
