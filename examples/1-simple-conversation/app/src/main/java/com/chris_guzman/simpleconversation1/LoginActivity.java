@@ -11,7 +11,8 @@ import android.widget.Toast;
 
 import com.nexmo.sdk.conversation.client.ConversationClient;
 import com.nexmo.sdk.conversation.client.User;
-import com.nexmo.sdk.conversation.client.event.CompletionListeners.LoginListener;
+import com.nexmo.sdk.conversation.client.event.LoginListener;
+import com.nexmo.sdk.conversation.client.event.NexmoAPIError;
 
 public class LoginActivity extends AppCompatActivity {
     private final String TAG = LoginActivity.class.getSimpleName();
@@ -59,8 +60,13 @@ public class LoginActivity extends AppCompatActivity {
         String userToken = authenticate();
         conversationClient.login(userToken, new LoginListener() {
             @Override
-            public void onLogin(final User user) {
+            public void onSuccess(User user) {
                 showLoginSuccess(user);
+            }
+
+            @Override
+            public void onError(NexmoAPIError apiError) {
+                logAndShow("Login Error: " + apiError.getMessage());
             }
 
             @Override
@@ -88,11 +94,6 @@ public class LoginActivity extends AppCompatActivity {
                         loginTxt.setText("Token Expired. Generate new token.");
                     }
                 });
-            }
-
-            @Override
-            public void onError(int errCode, String errMessage) {
-                logAndShow("Login Error: " + errMessage);
             }
         });
     }

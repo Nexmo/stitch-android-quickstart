@@ -16,9 +16,10 @@ import com.nexmo.sdk.conversation.client.Event;
 import com.nexmo.sdk.conversation.client.Image;
 import com.nexmo.sdk.conversation.client.Member;
 import com.nexmo.sdk.conversation.client.Text;
-import com.nexmo.sdk.conversation.client.event.CompletionListeners.EventSendListener;
 import com.nexmo.sdk.conversation.client.event.EventListener;
 import com.nexmo.sdk.conversation.client.event.EventType;
+import com.nexmo.sdk.conversation.client.event.NexmoAPIError;
+import com.nexmo.sdk.conversation.client.event.RequestHandler;
 
 public class ChatActivity extends AppCompatActivity {
     private final String TAG = ChatActivity.this.getClass().getSimpleName();
@@ -67,17 +68,17 @@ public class ChatActivity extends AppCompatActivity {
     }
 
     private void sendMessage() {
-        conversation.sendText(msgEditTxt.getText().toString(), new EventSendListener() {
+        conversation.sendText(msgEditTxt.getText().toString(), new RequestHandler<Event>() {
             @Override
-            public void onSent(Event event) {
+            public void onSuccess(Event event) {
                 if (event.getType().equals(EventType.TEXT)) {
                     Log.d(TAG, "onSent: " + ((Text) event).getText());
                 }
             }
 
             @Override
-            public void onError(int errCode, String errMessage) {
-                logAndShow("Error sending message: " + errMessage);
+            public void onError(NexmoAPIError apiError) {
+                logAndShow("Error sending message: " + apiError.getMessage());
             }
         });
     }
@@ -85,8 +86,13 @@ public class ChatActivity extends AppCompatActivity {
     private void addListener() {
         eventListener = new EventListener() {
             @Override
-            public void onError(int errCode, String errMessage) {
-                logAndShow("Error adding EventListener: " + errMessage);
+            public void onSuccess(Object result) {
+                //intentionally left blank
+            }
+
+            @Override
+            public void onError(NexmoAPIError apiError) {
+                logAndShow("Error adding EventListener: " + apiError.getMessage());
             }
 
             @Override

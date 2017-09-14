@@ -33,7 +33,7 @@ This guide will introduce you to the following concepts.
 
 _Note: The steps within this section can all be done dynamically via server-side logic. But in order to get the client-side functionality we're going to manually run through setup._
 
-### 1.1 - Create a Nexmo 
+### 1.1 - Create a Nexmo application
 
 Create an application within the Nexmo platform.
 
@@ -59,7 +59,7 @@ Generate a JWT using your Application ID (`YOUR_APP_ID`).
 $ APP_JWT="$(nexmo jwt:generate ./private.key exp=$(($(date +%s)+86400)) application_id=YOUR_APP_ID)"
 ```
 
-*Note: The above command saves the generated JWT to a `APP_JWT` variable. It also sets the expiry of the JWT (`exp`) to one day from now.*
+*Note: The above command saves the generated JWT to a `APP_JWT` variable. It also sets the expiry of the JWT (`exp`) to one day from now instead of the default expiry time of 30 minutes.*
 
 ### 1.3 - Create a Conversation
 
@@ -73,7 +73,7 @@ $ curl -X POST https://api.nexmo.com/beta/conversations\
 This will result in a JSON response that looks something like the following. Take a note of the `id` attribute as this is the unique identifier for the conversation that has been created. We'll refer to this as `CONVERSATION_ID` later.
 
 ```json
-{"id":"CON-8cda4c2d-9a7d-42ff-b695-ec4124dfcc38","href":"http://conversation.local/v1/conversations/CON-8cda4c2d-9a7d-42ff-b695-ec4124dfcc38"}
+{"id":"CON-aaaaaaaa-bbbb-cccc-dddd-0123456789ab","href":"http://conversation.local/v1/conversations/CON-aaaaaaaa-bbbb-cccc-dddd-0123456789ab"}
 ```
 
 ### 1.4 - Create a User
@@ -90,7 +90,7 @@ curl -X POST https://api.nexmo.com/beta/users\
 The output will look as follows:
 
 ```json
-{"id":"USR-9a88ad39-31e0-4881-b3ba-3b253e457603","href":"http://conversation.local/v1/users/USR-9a88ad39-31e0-4881-b3ba-3b253e457603"}
+{"id":"USR-aaaaaaaa-bbbb-cccc-dddd-0123456789ab","href":"http://conversation.local/v1/users/USR-aaaaaaaa-bbbb-cccc-dddd-0123456789ab"}
 ```
 
 Take a note of the `id` attribute as this is the unique identifier for the user that has been created. We'll refer to this as `USER_ID` later.
@@ -153,7 +153,7 @@ In the `build.gradle` file we'll add the Nexmo Conversation Android SDK.
 //app/build.gradle
 dependencies {
 ...
-  compile 'com.nexmo:conversation:0.6.4'
+  compile 'com.nexmo:conversation:0.11.0'
   compile 'com.android.support:appcompat-v7:25.3.1'
 ...
 }
@@ -322,8 +322,13 @@ private void login() {
     String userToken = authenticate();
     conversationClient.login(userToken, new LoginListener() {
         @Override
-        public void onLogin(final User user) {
+        public void onSuccess(User user) {
             showLoginSuccess(user);
+        }
+
+        @Override
+        public void onError(NexmoAPIError apiError) {
+            logAndShow("Login Error: " + apiError.getMessage());
         }
 
         @Override
@@ -351,11 +356,6 @@ private void login() {
                     loginTxt.setText("Token Expired. Generate new token.");
                 }
             });
-        }
-
-        @Override
-        public void onError(int errCode, String errMessage) {
-            logAndShow("Login Error: " + errMessage);
         }
     });
 }
@@ -505,22 +505,22 @@ public class ChatActivity extends AppCompatActivity {
 ### 2.8 - Sending `text` Events
 
 To send a message we simply need to call `sendText` on our instance of `Conversation conversation`. `sendText` takes two arguments, a `String message`, and an `EventSendListener`
-In the `EventSendListener` we'll get two call backs: `onSent()` and `onError()`. If there's an error we'll just show an error in the logs and in a toast. We'll just log out the message in the `onSent()` callback since we'll handle messages as they're received instead of as they're sent. You might notice that I'm checking the type of the message before I log it out. That's because a `Message` can be `Text` or an `Image`. For now we'll just worry about `Text`.
+In the `EventSendListener` we'll get two call backs: `onSuccess()` and `onError()`. If there's an error we'll just show an error in the logs and in a toast. We'll just log out the message in the `onSuccess()` callback since we'll handle messages as they're received instead of as they're sent. You might notice that I'm checking the type of the message before I log it out. That's because a `Message` can be `Text` or an `Image`. For now we'll just worry about `Text`.
 
 ```java
 //ChatActivity.java
 private void sendMessage() {
-    conversation.sendText(msgEditTxt.getText().toString(), new EventSendListener() {
+    conversation.sendText(msgEditTxt.getText().toString(), new RequestHandler<Event>() {
         @Override
-        public void onSent(Event event) {
+        public void onSuccess(Event event) {
             if (event.getType().equals(EventType.TEXT)) {
                 Log.d(TAG, "onSent: " + ((Text) event).getText());
             }
         }
 
         @Override
-        public void onError(int errCode, String errMessage) {
-            logAndShow("Error sending message: " + errMessage);
+        public void onError(NexmoAPIError apiError) {
+            logAndShow("Error sending message: " + apiError.getMessage());
         }
     });
 }
@@ -535,8 +535,13 @@ We want to know when text messages are being received so we need to add a `Event
 private void addListener() {
     eventListener = new EventListener() {
         @Override
-        public void onError(int errCode, String errMessage) {
-            logAndShow("Error adding EventListener: " + errMessage);
+        public void onSuccess(Object result) {
+            //intentionally left blank
+        }
+
+        @Override
+        public void onError(NexmoAPIError apiError) {
+            logAndShow("Error adding EventListener: " + apiError.getMessage());
         }
 
         @Override
