@@ -153,7 +153,7 @@ In the `build.gradle` file we'll add the Nexmo Conversation Android SDK.
 //app/build.gradle
 dependencies {
 ...
-  compile 'com.nexmo:conversation:0.6.4'
+  compile 'com.nexmo:conversation:0.7.1'
   compile 'com.android.support:appcompat-v7:25.3.1'
 ...
 }
