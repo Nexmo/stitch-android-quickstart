@@ -1,4 +1,4 @@
-package com.chris_guzman.simpleconversation1;
+package com.nexmo.simpleconversation1;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -124,11 +124,12 @@ public class ChatActivity extends AppCompatActivity {
     }
 
     private void showMessage(final Text message) {
+        msgEditTxt.setText(null);
+        final String prevText = chatTxt.getText().toString();
+//        chatTxt.setText(prevText + "\n" + message.getText());
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                msgEditTxt.setText(null);
-                String prevText = chatTxt.getText().toString();
                 chatTxt.setText(prevText + "\n" + message.getText());
             }
         });
@@ -136,11 +137,6 @@ public class ChatActivity extends AppCompatActivity {
 
     private void logAndShow(final String message) {
         Log.d(TAG, message);
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                Toast.makeText(ChatActivity.this, message, Toast.LENGTH_SHORT).show();
-            }
-        });
+        Toast.makeText(ChatActivity.this, message, Toast.LENGTH_SHORT).show();
     }
 }

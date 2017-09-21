@@ -294,12 +294,7 @@ public class LoginActivity extends AppCompatActivity {
 
     private void logAndShow(final String message) {
         Log.d(TAG, message);
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                Toast.makeText(LoginActivity.this, message, Toast.LENGTH_SHORT).show();
-            }
-        });
+        Toast.makeText(LoginActivity.this, message, Toast.LENGTH_SHORT).show();
     }
 }
 ```
@@ -339,34 +334,19 @@ private void login() {
         @Override
         public void onTokenInvalid() {
             logAndShow("Token Invalid.");
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    loginTxt.setText("Token Invalid");
-                }
-            });
+            loginTxt.setText("Token Invalid");
         }
 
         @Override
         public void onTokenExpired() {
             logAndShow("Token Expired. Generate new token.");
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    loginTxt.setText("Token Expired. Generate new token.");
-                }
-            });
+            loginTxt.setText("Token Expired. Generate new token.");
         }
     });
 }
 
 private void showLoginSuccess(final User user) {
-    runOnUiThread(new Runnable() {
-        @Override
-        public void run() {
-            loginTxt.setText("Logged in as " + user.getName() + "\nStart a new conversation");
-        }
-    });
+    loginTxt.setText("Logged in as " + user.getName() + "\nStart a new conversation");
 }
 
 
@@ -489,15 +469,10 @@ public class ChatActivity extends AppCompatActivity {
       conversation = conversationClient.getConversation(conversationId);
   }
 
-  private void logAndShow(final String message) {
-      Log.d(TAG, message);
-      runOnUiThread(new Runnable() {
-          @Override
-          public void run() {
-              Toast.makeText(ChatActivity.this, message, Toast.LENGTH_SHORT).show();
-          }
-      });
-  }
+    private void logAndShow(final String message) {
+        Log.d(TAG, message);
+        Toast.makeText(ChatActivity.this, message, Toast.LENGTH_SHORT).show();
+    }
 }
 
 ```
@@ -573,14 +548,14 @@ private void addListener() {
 }
 
 private void showMessage(final Text message) {
-    runOnUiThread(new Runnable() {
-        @Override
-        public void run() {
-            msgEditTxt.setText(null);
-            String prevText = chatTxt.getText().toString();
-            chatTxt.setText(prevText + "\n" + message.getText());
-        }
-    });
+        msgEditTxt.setText(null);
+        final String prevText = chatTxt.getText().toString();
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                chatTxt.setText(prevText + "\n" + message.getText());
+            }
+        });
 }
 ```
 

@@ -1,4 +1,4 @@
-package com.chris_guzman.simpleconversation1;
+package com.nexmo.simpleconversation1;
 
 import android.app.Application;
 
