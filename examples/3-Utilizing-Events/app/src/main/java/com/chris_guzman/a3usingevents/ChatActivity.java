@@ -17,43 +17,41 @@ import android.widget.Toast;
 import com.nexmo.sdk.conversation.client.Conversation;
 import com.nexmo.sdk.conversation.client.ConversationClient;
 import com.nexmo.sdk.conversation.client.Event;
-import com.nexmo.sdk.conversation.client.Image;
 import com.nexmo.sdk.conversation.client.Member;
 import com.nexmo.sdk.conversation.client.SeenReceipt;
+import com.nexmo.sdk.conversation.client.Subscription;
 import com.nexmo.sdk.conversation.client.Text;
-import com.nexmo.sdk.conversation.client.event.CompletionListeners.ConversationListener;
-import com.nexmo.sdk.conversation.client.event.CompletionListeners.EventSendListener;
-import com.nexmo.sdk.conversation.client.event.CompletionListeners.MemberTypingListener;
-import com.nexmo.sdk.conversation.client.event.CompletionListeners.TypingSendListener;
-import com.nexmo.sdk.conversation.client.event.EventListener;
-import com.nexmo.sdk.conversation.client.event.SeenReceiptListener;
+import com.nexmo.sdk.conversation.client.event.NexmoAPIError;
+import com.nexmo.sdk.conversation.client.event.RequestHandler;
+import com.nexmo.sdk.conversation.client.event.ResultListener;
+import com.nexmo.sdk.conversation.client.event.container.Receipt;
+import com.nexmo.sdk.conversation.core.SubscriptionList;
 
 import java.util.ArrayList;
 import java.util.List;
+
 
 public class ChatActivity extends AppCompatActivity {
     private String TAG = ChatActivity.class.getSimpleName();
 
     private EditText chatBox;
-    private ImageButton sendBtn;
     private TextView typingNotificationTxt;
     private RecyclerView recyclerView;
     private ChatAdapter chatAdapter;
     private List<Text> texts = new ArrayList<>();
 
-    private ConversationClient conversationClient;
     private Conversation conversation;
-    private EventListener eventListener;
-    private MemberTypingListener memberTypingListener;
-    private TypingSendListener typingSendListener;
-    private SeenReceiptListener seenReceiptListener;
+    private RequestHandler<Member.TYPING_INDICATOR> typingSendListener;
+    private SubscriptionList subscriptions = new SubscriptionList();
+    private Subscription<Event> eventSubscription;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chat);
 
-        conversationClient = ((ConversationClientApplication) getApplication()).getConversationClient();
+        ConversationClient conversationClient = ((ConversationClientApplication) getApplication()).getConversationClient();
         Intent intent = getIntent();
         String conversationId = intent.getStringExtra("CONVERSATION_ID");
         conversation = conversationClient.getConversation(conversationId);
@@ -66,7 +64,7 @@ public class ChatActivity extends AppCompatActivity {
         recyclerView.setLayoutManager(linearLayoutManager);
 
         chatBox = (EditText) findViewById(R.id.chat_box);
-        sendBtn = (ImageButton) findViewById(R.id.send_btn);
+        ImageButton sendBtn = (ImageButton) findViewById(R.id.send_btn);
         typingNotificationTxt = (TextView) findViewById(R.id.typing_notification);
 
         sendBtn.setOnClickListener(new View.OnClickListener() {
@@ -81,9 +79,9 @@ public class ChatActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         attachListeners();
-        conversation.updateEvents(null, null, new ConversationListener() {
+        conversation.updateEvents(null, null, new RequestHandler<Conversation>() {
             @Override
-            public void onConversationUpdated(final Conversation conversation) {
+            public void onSuccess(Conversation result) {
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
@@ -96,8 +94,8 @@ public class ChatActivity extends AppCompatActivity {
             }
 
             @Override
-            public void onError(int errCode, String errMessage) {
-                logAndShow("Error Updating Conversation: " + errMessage);
+            public void onError(NexmoAPIError apiError) {
+                logAndShow("Error Updating Conversation: " + apiError.getMessage());
             }
         });
     }
@@ -105,80 +103,52 @@ public class ChatActivity extends AppCompatActivity {
     @Override
     protected void onPause() {
         super.onPause();
-        conversation.removeEventListener(eventListener);
-        conversation.removeTypingListener(memberTypingListener);
-        conversation.removeSeenReceiptListener(seenReceiptListener);
+        subscriptions.unsubscribeAll();
+        eventSubscription.unsubscribe();
     }
 
     private void attachListeners() {
-        eventListener = new EventListener() {
+        ResultListener<Event> eventListener = new ResultListener<Event>() {
             @Override
-            public void onTextReceived(final Text message) {
+            public void onSuccess(final Event message) {
+                logAndShow("onNewMessage of type " + message.getType());
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        texts.add(message);
+                        texts.add(((Text) message));
                         chatAdapter.notifyDataSetChanged();
                         recyclerView.smoothScrollToPosition(chatAdapter.getItemCount());
                     }
                 });
             }
-
-            @Override
-            public void onTextDeleted(Text message, Member member) {
-                //intentionally left blank
-            }
-
-            @Override
-            public void onImageReceived(Image image) {
-                //intentionally left blank
-            }
-
-            @Override
-            public void onImageDeleted(Image message, Member member) {
-                //intentionally left blank
-            }
-
-            @Override
-            public void onImageDownloaded(Image image) {
-                //intentionally left blank
-            }
-
-            @Override
-            public void onError(int errCode, String errMessage) {
-                logAndShow("Error receiving message: " + errMessage);
-            }
         };
 
-        conversation.addEventListener(eventListener);
+        eventSubscription = conversation.messageEvent().add(eventListener);
 
-        memberTypingListener = new MemberTypingListener() {
-            @Override
-            public void onError(int errCode, String errMessage) {
-                logAndShow("onTyping onError: " + errMessage);
-            }
+//        conversation.messageEvent().add(eventListener).addTo(subscriptions);
 
+        conversation.typingEvent().add(new ResultListener<Member>() {
             @Override
-            public void onTyping(final Member member, final Member.TYPING_INDICATOR typingIndicator) {
+            public void onSuccess(final Member member) {
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        String typingMsg = typingIndicator.equals(Member.TYPING_INDICATOR.ON) ? member.getName() + " is typing" : null;
+                        String typingMsg = member.getTypingIndicator().equals(Member.TYPING_INDICATOR.ON) ? member.getName() + " is typing" : null;
                         typingNotificationTxt.setText(typingMsg);
                     }
                 });
             }
-        };
+        }).addTo(subscriptions);
 
-        conversation.addTypingListener(memberTypingListener);
-
-        typingSendListener = new TypingSendListener() {
+        typingSendListener = new RequestHandler<Member.TYPING_INDICATOR>() {
             @Override
-            public void onTypingSent(Member.TYPING_INDICATOR typingIndicator) {
+            public void onSuccess(Member.TYPING_INDICATOR result) {
+
             }
 
             @Override
-            public void onError(int errCode, String errMessage) {
+            public void onError(NexmoAPIError apiError) {
+
             }
         };
 
@@ -203,9 +173,9 @@ public class ChatActivity extends AppCompatActivity {
             }
         });
 
-        seenReceiptListener = new SeenReceiptListener() {
+        conversation.seenEvent().add(new ResultListener<Receipt<SeenReceipt>>() {
             @Override
-            public void onTextSeen(Text text, Member member, SeenReceipt seenReceipt) {
+            public void onSuccess(Receipt<SeenReceipt> result) {
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
@@ -213,20 +183,16 @@ public class ChatActivity extends AppCompatActivity {
                     }
                 });
             }
+        }).addTo(subscriptions);
 
-            @Override
-            public void onImageSeen(Image image, Member member, SeenReceipt seenReceipt) {
-                //intentionally left blank
-            }
-        };
 
-        conversation.addSeenReceiptListener(seenReceiptListener);
     }
 
     private void sendMessage() {
-        conversation.sendText(chatBox.getText().toString(), new EventSendListener() {
+        conversation.sendText(chatBox.getText().toString(), new RequestHandler<Event>() {
             @Override
-            public void onSent(Event event) {
+            public void onSuccess(Event result) {
+                logAndShow("Sending " + ((Text) result).getText());
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
@@ -236,8 +202,8 @@ public class ChatActivity extends AppCompatActivity {
             }
 
             @Override
-            public void onError(int errCode, String errMessage) {
-                logAndShow("Error sending message: " + errMessage);
+            public void onError(NexmoAPIError apiError) {
+                logAndShow("Error sending message: " + apiError.getMessage());
             }
         });
     }

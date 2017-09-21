@@ -10,9 +10,11 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.nexmo.sdk.conversation.client.Member;
+import com.nexmo.sdk.conversation.client.SeenReceipt;
 import com.nexmo.sdk.conversation.client.Text;
-import com.nexmo.sdk.conversation.client.event.CompletionListeners.MarkedAsSeenListener;
 import com.nexmo.sdk.conversation.client.event.EventType;
+import com.nexmo.sdk.conversation.client.event.NexmoAPIError;
+import com.nexmo.sdk.conversation.client.event.RequestHandler;
 
 import java.util.List;
 
@@ -21,14 +23,15 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder> {
     private static final String TAG = "ChatAdapter";
     private List<Text> messages;
     private Member self;
-    private MarkedAsSeenListener markedAsSeenListener = new MarkedAsSeenListener() {
+    private RequestHandler<SeenReceipt> seenReceiptRequestHandler = new RequestHandler<SeenReceipt>() {
         @Override
-        public void onMarkedAsSeen() {
+        public void onSuccess(SeenReceipt result) {
+            //intentionally left blank
         }
 
         @Override
-        public void onError(int errCode, String errMessage) {
-            Log.d(TAG, "Error onMarkedAsSeen: " + errMessage);
+        public void onError(NexmoAPIError apiError) {
+            Log.d(TAG, "Error onMarkedAsSeen: " + apiError.getMessage());
         }
     };
 
@@ -51,7 +54,7 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder> {
     public void onBindViewHolder(ChatAdapter.ViewHolder holder, int position) {
         Text textMessage = messages.get(position);
         if (!textMessage.getMember().equals(self)) {
-            textMessage.markAsSeen(markedAsSeenListener);
+            textMessage.markAsSeen(seenReceiptRequestHandler);
         }
         if (textMessage.getType().equals(EventType.TEXT)) {
             holder.text.setText(textMessage.getText());
