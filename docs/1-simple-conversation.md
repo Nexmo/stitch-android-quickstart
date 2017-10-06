@@ -93,15 +93,15 @@ The output will look as follows:
 {"id":"USR-aaaaaaaa-bbbb-cccc-dddd-0123456789ab","href":"http://conversation.local/v1/users/USR-aaaaaaaa-bbbb-cccc-dddd-0123456789ab"}
 ```
 
-Take a note of the `id` attribute as this is the unique identifier for the user that has been created. We'll refer to this as `USER_ID` later.
+Take a note of the `id` attribute as this is the unique identifier for the user that has been created. We'll refer to this as `YOUR_USER_ID` later.
 
 ### 1.5 - Add the User to the Conversation
 
-Finally, let's add the user to the conversation that we created. Remember to replace `CONVERSATION_ID` and `USER_ID` values.
+Finally, let's add the user to the conversation that we created. Remember to replace `YOUR_CONVERSATION_ID` and `YOUR_USER_ID` values.
 
 ```bash
-$ curl -X POST https://api.nexmo.com/beta/conversations/CONVERSATION_ID/members\
- -H 'Authorization: Bearer '$APP_JWT -H 'Content-Type:application/json' -d '{"action":"join", "user_id":"USER_ID", "channel":{"type":"app"}}'
+$ curl -X POST https://api.nexmo.com/beta/conversations/YOUR_CONVERSATION_ID/members\
+ -H 'Authorization: Bearer '$APP_JWT -H 'Content-Type:application/json' -d '{"action":"join", "user_id":"YOUR_USER_ID", "channel":{"type":"app"}}'
 ```
 
 The response to this request will confirm that the user has `JOINED` the "Nexmo Chat" conversation.
@@ -110,10 +110,10 @@ The response to this request will confirm that the user has `JOINED` the "Nexmo 
 {"id":"MEM-fe168bd2-de89-4056-ae9c-ca3d19f9184d","user_id":"USR-f4a27041-744d-46e0-a75d-186ad6cfcfae","state":"JOINED","timestamp":{"joined":"2017-06-17T22:23:41.072Z"},"channel":{"type":"app"},"href":"http://conversation.local/v1/conversations/CON-8cda4c2d-9a7d-42ff-b695-ec4124dfcc38/members/MEM-fe168bd2-de89-4056-ae9c-ca3d19f9184d"}
 ```
 
-You can also check this by running the following request, replacing `CONVERSATION_ID`:
+You can also check this by running the following request, replacing `YOUR_CONVERSATION_ID`:
 
 ```bash
-$ curl https://api.nexmo.com/beta/conversations/CONVERSATION_ID/members\
+$ curl https://api.nexmo.com/beta/conversations/YOUR_CONVERSATION_ID/members\
  -H 'Authorization: Bearer '$APP_JWT
 ```
 
@@ -153,7 +153,7 @@ In the `build.gradle` file we'll add the Nexmo Conversation Android SDK.
 //app/build.gradle
 dependencies {
 ...
-  compile 'com.nexmo:conversation:0.11.0'
+  compile 'com.nexmo:conversation:0.13.0'
   compile 'com.android.support:appcompat-v7:25.3.1'
 ...
 }
@@ -587,7 +587,7 @@ protected void onDestroy() {
 
 After this you should be able to run the app and send messages to a conversation like so:
 
-![Hello world!](http://g.recordit.co/uqdFsAOTFE.gif)
+![Hello world!](http://g.recordit.co/sky00C231e.gif)
 
 ## Where next?
 

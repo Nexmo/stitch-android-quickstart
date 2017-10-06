@@ -266,11 +266,11 @@ Run the apps on both of your emulators. On one of them, login with the username 
 
 Finally, let's invite the user to the conversation that we created.
 
-In your terminal, run the following command and remember to replace `CONVERSATION_ID` in the URL with the ID of the Conversation you created in the first guide and the `USER_ID` with the one you got when creating the User for `alice`.
+In your terminal, run the following command and remember to replace `YOUR_CONVERSATION_ID` in the URL with the ID of the Conversation you created in the first guide and the `SECOND_USER_ID` with the one you got when creating the User for `alice`.
 
 ```bash
-$ curl -X POST https://api.nexmo.com/beta/conversations/CONVERSATION_ID/members\
- -H 'Authorization: Bearer '$APP_JWT -H 'Content-Type:application/json' -d '{"action":"invite", "user_id":"USER_ID", "channel":{"type":"app"}}'
+$ curl -X POST https://api.nexmo.com/beta/conversations/YOUR_CONVERSATION_ID/members\
+ -H 'Authorization: Bearer '$APP_JWT -H 'Content-Type:application/json' -d '{"action":"invite", "user_id":"SECOND_USER_ID", "channel":{"type":"app"}}'
 ```
 
 The response to this request will confirm that the user has been `INVITED` the "Nexmo Chat" conversation.
@@ -279,10 +279,10 @@ The response to this request will confirm that the user has been `INVITED` the "
 {"id":"MEM-fe168bd2-de89-4056-ae9c-ca3d19f9184d","user_id":"USR-f4a27041-744d-46e0-a75d-186ad6cfcfae","state":"INVITED","timestamp":{"invited":"2017-06-17T22:23:41.072Z"},"channel":{"type":"app"},"href":"http://conversation.local/v1/conversations/CON-8cda4c2d-9a7d-42ff-b695-ec4124dfcc38/members/MEM-fe168bd2-de89-4056-ae9c-ca3d19f9184d"}
 ```
 
-You can also check that `alice` was invited by running the following request, replacing `CONVERSATION_ID`:
+You can also check that `alice` was invited by running the following request, replacing `YOUR_CONVERSATION_ID`:
 
 ```bash
-$ curl https://api.nexmo.com/beta/conversations/CONVERSATION_ID/members\
+$ curl https://api.nexmo.com/beta/conversations/YOUR_CONVERSATION_ID/members\
  -H 'Authorization: Bearer '$APP_JWT
 ```
 

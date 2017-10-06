@@ -1,4 +1,4 @@
-package com.chris_guzman.simpleconversation2;
+package com.nexmo.simpleconversation2;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -135,11 +135,6 @@ public class ChatActivity extends AppCompatActivity {
 
     private void logAndShow(final String message) {
         Log.d(TAG, message);
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                Toast.makeText(ChatActivity.this, message, Toast.LENGTH_SHORT).show();
-            }
-        });
+        Toast.makeText(ChatActivity.this, message, Toast.LENGTH_SHORT).show();
     }
 }

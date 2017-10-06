@@ -1,4 +1,4 @@
-package com.chris_guzman.simpleconversation2;
+package com.nexmo.simpleconversation2;
 
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -82,13 +82,7 @@ public class LoginActivity extends AppCompatActivity {
                 LinearLayout.LayoutParams.MATCH_PARENT);
         input.setLayoutParams(lp);
         dialog.setView(input);
-
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                dialog.show();
-            }
-        });
+        dialog.show();
     }
 
     private void loginAsUser(String token) {
@@ -113,23 +107,13 @@ public class LoginActivity extends AppCompatActivity {
             @Override
             public void onTokenInvalid() {
                 logAndShow("Token Invalid.");
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        loginTxt.setText("Token Invalid");
-                    }
-                });
+                loginTxt.setText("Token Invalid");
             }
 
             @Override
             public void onTokenExpired() {
                 logAndShow("Token Expired. Generate new token.");
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        loginTxt.setText("Token Expired. Generate new token.");
-                    }
-                });
+                loginTxt.setText("Token Expired. Generate new token.");
             }
         });
     }

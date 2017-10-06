@@ -16,8 +16,8 @@ import com.nexmo.sdk.conversation.client.event.NexmoAPIError;
 
 public class LoginActivity extends AppCompatActivity {
     private final String TAG = LoginActivity.class.getSimpleName();
-    private String CONVERSATION_ID="CON-fbf19d35-6184-4a26-8142-cb7b1a3828c2";
-    private String USER_JWT="eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE1MDYwMjcwMDMsImp0aSI6IjcxNWUxODQwLTlmMGUtMTFlNy05ZTNkLThmZTUyMTA1MmQ3MCIsInN1YiI6ImphbWllIiwiZXhwIjoiMTUwNjExMzQwMyIsImFjbCI6eyJwYXRocyI6eyIvdjEvc2Vzc2lvbnMvKioiOnt9LCIvdjEvdXNlcnMvKioiOnt9LCIvdjEvY29udmVyc2F0aW9ucy8qKiI6e319fSwiYXBwbGljYXRpb25faWQiOiIyZTZmNDVjZC0wZDc3LTQ5MzItOTg0MC03NGFkZDRkNjJiNjYifQ.AIe907xYz6jhZKKJVRkT4qYeeedHzMgZH5EjA49P59of9JS9SGaxnmhQVAc-ZYAdlDAZ1x_UMgQkj_LCuCzdWV92fiMMtXkPv_BzLbQJbr754sAYVtEVITmgaOxZW4SJ1wmwAmcVgXID5fpqmSvOLnln_bS4mx34Lc03B9B7LSWxkbhCM4YjXlh1j4sn7KeEmZ1S2jVjsvnYEkCTuTIW83FOHGtcsL2IswqtWstMGRhLmvBnuHrp43JN9-somZDL6rZvmoxvjd6xPQNgTaURKccB6gm29OhU7sYkj0rdmqs1WCohVU2tC-YLI3snWeCZItr_0n8XOpLzwVIQN46Mkw";
+    private String CONVERSATION_ID;
+    private String USER_JWT;
 
     private ConversationClient conversationClient;
     private TextView loginTxt;

@@ -1,4 +1,4 @@
-package com.chris_guzman.simpleconversation2;
+package com.nexmo.simpleconversation2;
 
 import android.app.Application;
 
@@ -10,7 +10,7 @@ public class ConversationClientApplication extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
-        this.conversationClient = new ConversationClient.ConversationClientBuilder().context(this).build();
+        this.conversationClient = new ConversationClient.ConversationClientBuilder().context(this).onMainThread(true).build();
     }
 
     public ConversationClient getConversationClient() {
