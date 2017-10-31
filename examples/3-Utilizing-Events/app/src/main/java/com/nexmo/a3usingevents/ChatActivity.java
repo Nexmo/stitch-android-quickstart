@@ -1,4 +1,4 @@
-package com.chris_guzman.a3usingevents;
+package com.nexmo.a3usingevents;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -21,15 +21,12 @@ import com.nexmo.sdk.conversation.client.Image;
 import com.nexmo.sdk.conversation.client.Member;
 import com.nexmo.sdk.conversation.client.SeenReceipt;
 import com.nexmo.sdk.conversation.client.Text;
-import com.nexmo.sdk.conversation.client.event.CompletionListeners.ConversationListener;
-import com.nexmo.sdk.conversation.client.event.CompletionListeners.EventSendListener;
-import com.nexmo.sdk.conversation.client.event.CompletionListeners.MemberTypingListener;
-import com.nexmo.sdk.conversation.client.event.CompletionListeners.TypingSendListener;
 import com.nexmo.sdk.conversation.client.event.EventListener;
-import com.nexmo.sdk.conversation.client.event.SeenReceiptListener;
-
-import java.util.ArrayList;
-import java.util.List;
+import com.nexmo.sdk.conversation.client.event.NexmoAPIError;
+import com.nexmo.sdk.conversation.client.event.RequestHandler;
+import com.nexmo.sdk.conversation.client.event.ResultListener;
+import com.nexmo.sdk.conversation.client.event.container.Receipt;
+import com.nexmo.sdk.conversation.core.SubscriptionList;
 
 public class ChatActivity extends AppCompatActivity {
     private String TAG = ChatActivity.class.getSimpleName();
@@ -39,14 +36,12 @@ public class ChatActivity extends AppCompatActivity {
     private TextView typingNotificationTxt;
     private RecyclerView recyclerView;
     private ChatAdapter chatAdapter;
-    private List<Text> texts = new ArrayList<>();
 
     private ConversationClient conversationClient;
     private Conversation conversation;
     private EventListener eventListener;
-    private MemberTypingListener memberTypingListener;
-    private TypingSendListener typingSendListener;
-    private SeenReceiptListener seenReceiptListener;
+    private SubscriptionList subscriptions = new SubscriptionList();
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -58,9 +53,9 @@ public class ChatActivity extends AppCompatActivity {
         String conversationId = intent.getStringExtra("CONVERSATION_ID");
         conversation = conversationClient.getConversation(conversationId);
 
-        texts = conversation.getTexts();
         recyclerView = (RecyclerView) findViewById(R.id.recycler);
-        chatAdapter = new ChatAdapter(texts, conversation.getSelf());
+        chatAdapter = new ChatAdapter(conversation);
+        chatAdapter.setHasStableIds(false);
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(ChatActivity.this);
         recyclerView.setAdapter(chatAdapter);
         recyclerView.setLayoutManager(linearLayoutManager);
@@ -81,23 +76,23 @@ public class ChatActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         attachListeners();
-        conversation.updateEvents(null, null, new ConversationListener() {
+        conversation.updateEvents(null, null, new RequestHandler<Conversation>() {
             @Override
-            public void onConversationUpdated(final Conversation conversation) {
+            public void onError(NexmoAPIError apiError) {
+                logAndShow("Error Updating Conversation: " + apiError.getMessage());
+            }
+
+            @Override
+            public void onSuccess(final Conversation result) {
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        texts.clear();
-                        texts.addAll(conversation.getTexts());
+                        chatAdapter.setEvents(conversation.getEvents());
                         chatAdapter.notifyDataSetChanged();
                         recyclerView.smoothScrollToPosition(chatAdapter.getItemCount());
                     }
                 });
-            }
 
-            @Override
-            public void onError(int errCode, String errMessage) {
-                logAndShow("Error Updating Conversation: " + errMessage);
             }
         });
     }
@@ -106,18 +101,26 @@ public class ChatActivity extends AppCompatActivity {
     protected void onPause() {
         super.onPause();
         conversation.removeEventListener(eventListener);
-        conversation.removeTypingListener(memberTypingListener);
-        conversation.removeSeenReceiptListener(seenReceiptListener);
+        subscriptions.unsubscribeAll();
     }
 
     private void attachListeners() {
         eventListener = new EventListener() {
             @Override
+            public void onSuccess(Object result) {
+            }
+
+            @Override
+            public void onError(NexmoAPIError apiError) {
+                logAndShow("Error receiving message: " + apiError.getMessage());
+            }
+
+            @Override
             public void onTextReceived(final Text message) {
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        texts.add(message);
+                        chatAdapter.setEvents(conversation.getEvents());
                         chatAdapter.notifyDataSetChanged();
                         recyclerView.smoothScrollToPosition(chatAdapter.getItemCount());
                     }
@@ -143,44 +146,21 @@ public class ChatActivity extends AppCompatActivity {
             public void onImageDownloaded(Image image) {
                 //intentionally left blank
             }
-
-            @Override
-            public void onError(int errCode, String errMessage) {
-                logAndShow("Error receiving message: " + errMessage);
-            }
         };
 
         conversation.addEventListener(eventListener);
-
-        memberTypingListener = new MemberTypingListener() {
+        conversation.typingEvent().add(new ResultListener<Member>() {
             @Override
-            public void onError(int errCode, String errMessage) {
-                logAndShow("onTyping onError: " + errMessage);
-            }
-
-            @Override
-            public void onTyping(final Member member, final Member.TYPING_INDICATOR typingIndicator) {
+            public void onSuccess(final Member member) {
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        String typingMsg = typingIndicator.equals(Member.TYPING_INDICATOR.ON) ? member.getName() + " is typing" : null;
+                        String typingMsg = member.getTypingIndicator().equals(Member.TYPING_INDICATOR.ON) ? member.getName() + " is typing" : null;
                         typingNotificationTxt.setText(typingMsg);
                     }
                 });
             }
-        };
-
-        conversation.addTypingListener(memberTypingListener);
-
-        typingSendListener = new TypingSendListener() {
-            @Override
-            public void onTypingSent(Member.TYPING_INDICATOR typingIndicator) {
-            }
-
-            @Override
-            public void onError(int errCode, String errMessage) {
-            }
-        };
+        }).addTo(subscriptions);
 
         chatBox.addTextChangedListener(new TextWatcher() {
             @Override
@@ -196,16 +176,16 @@ public class ChatActivity extends AppCompatActivity {
             @Override
             public void afterTextChanged(Editable s) {
                 if (s.length() > 0) {
-                    conversation.startTyping(typingSendListener);
+                    sendTypeIndicator(Member.TYPING_INDICATOR.ON);
                 } else {
-                    conversation.stopTyping(typingSendListener);
+                    sendTypeIndicator(Member.TYPING_INDICATOR.OFF);
                 }
             }
         });
 
-        seenReceiptListener = new SeenReceiptListener() {
+        conversation.seenEvent().add(new ResultListener<Receipt<SeenReceipt>>() {
             @Override
-            public void onTextSeen(Text text, Member member, SeenReceipt seenReceipt) {
+            public void onSuccess(Receipt<SeenReceipt> result) {
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
@@ -213,31 +193,59 @@ public class ChatActivity extends AppCompatActivity {
                     }
                 });
             }
+        }).addTo(subscriptions);
+    }
 
-            @Override
-            public void onImageSeen(Image image, Member member, SeenReceipt seenReceipt) {
-                //intentionally left blank
+    private void sendTypeIndicator(Member.TYPING_INDICATOR typingIndicator) {
+        switch (typingIndicator){
+            case ON: {
+                conversation.startTyping(new RequestHandler<Member.TYPING_INDICATOR>() {
+                    @Override
+                    public void onSuccess(Member.TYPING_INDICATOR typingIndicator) {
+                        Log.d(TAG, "onTypingStartSent");
+                        // show my own type indicators
+                    }
+
+                    @Override
+                    public void onError(NexmoAPIError apiError) {
+                        logAndShow("Error start typing: " + apiError.getMessage());
+                    }
+                });
+                break;
             }
-        };
+            case OFF: {
+                conversation.stopTyping(new RequestHandler<Member.TYPING_INDICATOR>() {
+                    @Override
+                    public void onSuccess(Member.TYPING_INDICATOR typingIndicator) {
+                        Log.d(TAG, "onTypingStopSent");
+                        // show my own type indicators
+                    }
 
-        conversation.addSeenReceiptListener(seenReceiptListener);
+                    @Override
+                    public void onError(NexmoAPIError apiError) {
+                        logAndShow("Error stop typing: " + apiError.getMessage());
+                    }
+                });
+                break;
+            }
+        }
     }
 
     private void sendMessage() {
-        conversation.sendText(chatBox.getText().toString(), new EventSendListener() {
+        conversation.sendText(chatBox.getText().toString(), new RequestHandler<Event>() {
             @Override
-            public void onSent(Event event) {
+            public void onError(NexmoAPIError apiError) {
+                logAndShow("Error sending message: " + apiError.getMessage());
+            }
+
+            @Override
+            public void onSuccess(Event result) {
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
                         chatBox.setText(null);
                     }
                 });
-            }
-
-            @Override
-            public void onError(int errCode, String errMessage) {
-                logAndShow("Error sending message: " + errMessage);
             }
         });
     }

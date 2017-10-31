@@ -135,6 +135,11 @@ public class ChatActivity extends AppCompatActivity {
 
     private void logAndShow(final String message) {
         Log.d(TAG, message);
-        Toast.makeText(ChatActivity.this, message, Toast.LENGTH_SHORT).show();
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                Toast.makeText(ChatActivity.this, message, Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 }

@@ -1,7 +1,6 @@
-package com.chris_guzman.a3usingevents;
+package com.nexmo.a3usingevents;
 
 import android.app.Application;
-import android.util.Log;
 
 import com.nexmo.sdk.conversation.client.ConversationClient;
 

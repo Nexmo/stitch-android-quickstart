@@ -1,4 +1,4 @@
-package com.chris_guzman.a3usingevents;
+package com.nexmo.a3usingevents;
 
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -17,10 +17,11 @@ import com.nexmo.sdk.conversation.client.Conversation;
 import com.nexmo.sdk.conversation.client.ConversationClient;
 import com.nexmo.sdk.conversation.client.Member;
 import com.nexmo.sdk.conversation.client.User;
-import com.nexmo.sdk.conversation.client.event.CompletionListeners.ConversationListListener;
-import com.nexmo.sdk.conversation.client.event.CompletionListeners.JoinListener;
-import com.nexmo.sdk.conversation.client.event.CompletionListeners.LoginListener;
-import com.nexmo.sdk.conversation.client.event.ConversationInvitedListener;
+import com.nexmo.sdk.conversation.client.event.LoginListener;
+import com.nexmo.sdk.conversation.client.event.NexmoAPIError;
+import com.nexmo.sdk.conversation.client.event.RequestHandler;
+import com.nexmo.sdk.conversation.client.event.ResultListener;
+import com.nexmo.sdk.conversation.client.event.container.Invitation;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -94,9 +95,20 @@ public class LoginActivity extends AppCompatActivity {
         loginTxt.setText("Logging in...");
         conversationClient.login(token, new LoginListener() {
             @Override
-            public void onLogin(User user) {
+            public void onSuccess(User user) {
                 showLoginSuccessAndAddInvitationListener(user);
                 retrieveConversations();
+            }
+
+            @Override
+            public void onError(final NexmoAPIError apiError) {
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        loginTxt.setText("Login Error: " + apiError.getMessage());
+                    }
+                });
+                logAndShow("Login Error: " + apiError.getMessage());
             }
 
             @Override
@@ -126,34 +138,23 @@ public class LoginActivity extends AppCompatActivity {
                     }
                 });
             }
-
-            @Override
-            public void onError(int errCode, final String errMessage) {
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        loginTxt.setText("Login Error: " + errMessage);
-                    }
-                });
-                logAndShow("Login Error: " + errMessage);
-            }
         });
     }
 
     private void retrieveConversations() {
-        conversationClient.getConversations(new ConversationListListener() {
+        conversationClient.getConversations(new RequestHandler<List<Conversation>>() {
             @Override
-            public void onConversationList(List<Conversation> conversationList) {
+            public void onError(NexmoAPIError apiError) {
+                logAndShow("Error listing conversations: " + apiError.getMessage());
+            }
+
+            @Override
+            public void onSuccess(List<Conversation> conversationList) {
                 if (conversationList.size() > 0) {
                     showConversationList(conversationList);
                 } else {
                     logAndShow("You are not a member of any conversations");
                 }
-            }
-
-            @Override
-            public void onError(int errCode, String errMessage) {
-                logAndShow("Error listing conversations: " + errMessage);
             }
         });
     }
@@ -189,19 +190,19 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     private void showLoginSuccessAndAddInvitationListener(final User user) {
-        conversationClient.addConversationInvitedListener(new ConversationInvitedListener() {
+        conversationClient.invitedEvent().add(new ResultListener<Invitation>() {
             @Override
-            public void onConversationInvited(final Conversation conversation, Member invitedMember, String invitedByUsername) {
-                logAndShow(invitedByUsername + " invited you to their chat");
-                conversation.join(new JoinListener() {
+            public void onSuccess(final Invitation invitation) {
+                logAndShow(invitation.getInvitedBy() + " invited you to their chat");
+                invitation.getConversation().join(new RequestHandler<Member>() {
                     @Override
-                    public void onConversationJoined(Member member) {
-                        goToConversation(conversation);
+                    public void onError(NexmoAPIError apiError) {
+                        logAndShow("Error joining conversation: " + apiError.getMessage());
                     }
 
                     @Override
-                    public void onError(int errCode, String errMessage) {
-                        logAndShow("Error joining conversation: " + errMessage);
+                    public void onSuccess(Member member) {
+                        goToConversation(invitation.getConversation());
                     }
                 });
             }

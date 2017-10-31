@@ -126,13 +126,7 @@ public class ChatActivity extends AppCompatActivity {
     private void showMessage(final Text message) {
         msgEditTxt.setText(null);
         final String prevText = chatTxt.getText().toString();
-//        chatTxt.setText(prevText + "\n" + message.getText());
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                chatTxt.setText(prevText + "\n" + message.getText());
-            }
-        });
+        chatTxt.setText(prevText + "\n" + message.getText());
     }
 
     private void logAndShow(final String message) {

@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context="com.chris_guzman.a3usingevents.ChatActivity">
+    tools:context="com.nexmo.a3usingevents.ChatActivity">
 
     <android.support.v7.widget.RecyclerView
         android:id="@+id/recycler"
