@@ -10,7 +10,7 @@ This guide will introduce you to **Conversation Events**. We'll be attaching the
 ### Before you begin
 
 
-* Ensure you have run through the [the first](1-simple-conversation.md) [and second](2-inviting-members.md) quickstarts.
+* Ensure you have run through the [the first](1-simple-conversation.md) and [second](2-inviting-members.md) quickstarts.
 * Make sure you have two Android devices to complete this example. They can be two emulators, one emulator and one physical device, or two physical devices.
 
 ## 1 - Setup
@@ -41,7 +41,7 @@ We're going to be adding some new elements to our chat app so let's update our l
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context="com.chris_guzman.a3usingevents.ChatActivity">
+    tools:context="com.nexmo.a3usingevents.ChatActivity">
 
     <android.support.v7.widget.RecyclerView
         android:id="@+id/recycler"
@@ -101,11 +101,10 @@ public class ChatActivity extends AppCompatActivity {
     private TextView typingNotificationTxt;
     private RecyclerView recyclerView;
     private ChatAdapter chatAdapter;
-    private List<Text> texts = new ArrayList<>();
 
     private ConversationClient conversationClient;
     private Conversation conversation;
-    private EventListener eventListener;
+    private SubscriptionList subscriptions = new SubscriptionList();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -117,9 +116,8 @@ public class ChatActivity extends AppCompatActivity {
         String conversationId = intent.getStringExtra("CONVERSATION_ID");
         conversation = conversationClient.getConversation(conversationId);
 
-        texts = conversation.getTexts();
         recyclerView = (RecyclerView) findViewById(R.id.recycler);
-        chatAdapter = new ChatAdapter(texts);
+        chatAdapter = new ChatAdapter(conversation);
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(ChatActivity.this);
         recyclerView.setAdapter(chatAdapter);
         recyclerView.setLayoutManager(linearLayoutManager);
@@ -137,24 +135,55 @@ public class ChatActivity extends AppCompatActivity {
     }
 
     private void sendMessage() {
-      conversation.sendText(chatBox.getText().toString(), new EventSendListener() {
-        @Override
-        public void onSent(Event event) {
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    chatBox.setText(null);
-                }
-            });
-        }
+        conversation.sendText(chatBox.getText().toString(), new RequestHandler<Event>() {
+            @Override
+            public void onError(NexmoAPIError apiError) {
+                logAndShow("Error sending message: " + apiError.getMessage());
+            }
 
-        @Override
-        public void onError(int errCode, String errMessage) {
-            logAndShow("Error sending message: " + errMessage);
-        }
-    });
-  }
+            @Override
+            public void onSuccess(Event result) {
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        chatBox.setText(null);
+                    }
+                });
+            }
+        });
+    }
+}
+```
 
+We'll also need to attach the EventListener. We'll do so in `attachListeners()`
+
+```java
+@Override
+protected void onResume() {
+    super.onResume();
+    attachListeners();
+}
+
+//ChatActivity.java
+private void attachListeners() {
+    conversation.messageEvent().add(new ResultListener<Event>() {
+        @Override
+        public void onSuccess(Event result) {
+            chatAdapter.notifyDataSetChanged();
+            recyclerView.smoothScrollToPosition(chatAdapter.getItemCount());
+        }
+    }).addTo(subscriptions);
+}
+```
+
+And since we're attaching the listeners we'll need to remove them as well. Let's do that in the `onPause` part of the lifecycle.
+
+```java
+//ChatActivity.java
+@Override
+protected void onPause() {
+    super.onPause();
+    subscriptions.unsubscribeAll();
 }
 ```
 
@@ -167,11 +196,10 @@ Our RecyclerView will need a Adapter and ViewHolder. We can use this:
 public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder> {
 
     private static final String TAG = "ChatAdapter";
-    private List<Text> messages;
+    private List<Event> events = new ArrayList<>();
 
-    public ChatAdapter(List<Text> texts) {
-        messages = texts;
-        this.self = self;
+    public ChatAdapter(Conversation conversation) {
+        events = conversation.getEvents();
     }
 
     @Override
@@ -247,199 +275,127 @@ We'll also need to create a layout for the ViewHolder. Our layout will have a te
 
 ### 2.4 - Show chat history
 
-When `onResume` fires we'll get the messages in the conversation and update the adapter with those messages. We'll do this in `onResume` instead of `onCreate` so we can fetch the history and any missing messages if we leave the app and come back.
+The chat history should be ready when we start the `ChatActivity` so we'll fetch the history in `LoginActivity` before we fire the intent to start the next activity. We'll modify the `goToConversation()` method in `LoginActivity` to reflect this.
 
 ```java
-// ChatActivity.java
-@Override
-    protected void onResume() {
-        super.onResume();
-        attachListener();
-        conversation.updateEvents(null, null, new ConversationListener() {
-            @Override
-            public void onConversationUpdated(final Conversation conversation) {
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        texts.clear();
-                        texts.addAll(conversation.getTexts());
-                        chatAdapter.notifyDataSetChanged();
-                        recyclerView.smoothScrollToPosition(chatAdapter.getItemCount());
-                    }
-                });
-            }
+// LoginActivity.java
+private void goToConversation(final Conversation conversation) {
+    conversation.updateEvents(null, null, new RequestHandler<Conversation>() {
+        @Override
+        public void onError(NexmoAPIError apiError) {
+            logAndShow("Error Updating Conversation: " + apiError.getMessage());
+        }
 
-            @Override
-            public void onError(int errCode, String errMessage) {
-                logAndShow("Error Updating Conversation: " + errMessage);
-            }
-        });
-    }
+        @Override
+        public void onSuccess(final Conversation result) {
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    Intent intent = new Intent(LoginActivity.this, ChatActivity.class);
+                    intent.putExtra("CONVERSATION_ID", conversation.getConversationId());
+                    startActivity(intent);
+                }
+            });
+        }
+    });
+}
 ```
 
-We'll also need to attach the EventListener. We'll do so in `attachListener()`
+Calling `updateEvents()` on a conversation retrieves the event history. You can pass in two `Event` ids into the `updateEvents()` method to tell it to only retrieve events within the timeframe of those IDs.  We'll pass `null` into the first two parameters instead since we want to fetch the whole history of the conversation. Now when we fire the intent and start the `ChatActivity` we'll have the history of the chat loaded into the RecyclerView.
+
+### 2.5 - Adding Typing and Seen Listeners
+
+We can add other listeners just like we added our other Listener. The `startTyping` and `stopTyping` is used to indicate when a user is currently typing or not. The `typingEvent()` is used to listen to typing events sent. Finally, the `seenEvent()` will be used to mark our messages as read. We'll add theses listeners to our `attachListeners()` method.
 
 ```java
 //ChatActivity.java
 private void attachListeners() {
-        eventListener = new EventListener() {
-            @Override
-            public void onTextReceived(final Text message) {
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        texts.add(message);
-                        chatAdapter.notifyDataSetChanged();
-                        recyclerView.smoothScrollToPosition(chatAdapter.getItemCount());
-                    }
-                });
-            }
+  ...
 
-            @Override
-            public void onTextDeleted(Text message, Member member) {
-                //intentionally left blank
-            }
+  chatBox.addTextChangedListener(new TextWatcher() {
+      @Override
+      public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+          //intentionally left blank
+      }
 
-            @Override
-            public void onImageReceived(Image image) {
-                //intentionally left blank
-            }
+      @Override
+      public void onTextChanged(CharSequence s, int start, int before, int count) {
+          //intentionally left blank
+      }
 
-            @Override
-            public void onImageDeleted(Image message, Member member) {
-                //intentionally left blank
-            }
-
-            @Override
-            public void onImageDownloaded(Image image) {
-                //intentionally left blank
-            }
-
-            @Override
-            public void onError(int errCode, String errMessage) {
-                logAndShow("Error receiving message: " + errMessage);
-            }
-        };
-
-        conversation.addEventListener(eventListener);
-}
-```
-
-And since we're attaching the listeners we'll need to remove them as well. Let's do that in the `onPause` part of the lifecycle.
-
-```java
-//ChatActivity.java
-@Override
-protected void onPause() {
-    super.onPause();
-    conversation.removeEventListener(eventListener);
-}
-```
-
-### 2.5 - Adding Typing and Seen Listeners
-
-We can add other listeners just like we added our EventListener. The TypingSendListener is used to indicate when a user is currently typing or not. The MemberTypingListener is used to listen to typing events sent by the TypingSendListener. Finally, the SeenReceiptListener will be used to mark our messages as read. We'll add theses listeners to our `attachListeners()` method, remembering to detach them in `onPause()`. We'll make the listeners member variables in the Activity so their easy to manage:
-
-```java
-//ChatActivity.java
-public class ChatActivity extends AppCompatActivity {
-    ...
-    private ConversationClient conversationClient;
-    private Conversation conversation;
-    private EventListener eventListener;
-    private MemberTypingListener memberTypingListener;
-    private TypingSendListener typingSendListener;
-    private SeenReceiptListener seenReceiptListener;
-
-    ...
-
-    private void attachListeners() {
-
-    ...
-
-      memberTypingListener = new MemberTypingListener() {
-          @Override
-          public void onError(int errCode, String errMessage) {
-              logAndShow("onTyping onError: " + errMessage);
+      @Override
+      public void afterTextChanged(Editable s) {
+          if (s.length() > 0) {
+              sendTypeIndicator(Member.TYPING_INDICATOR.ON);
+          } else {
+              sendTypeIndicator(Member.TYPING_INDICATOR.OFF);
           }
+      }
+  });
 
-          @Override
-          public void onTyping(final Member member, final Member.TYPING_INDICATOR typingIndicator) {
-              runOnUiThread(new Runnable() {
-                  @Override
-                  public void run() {
-                      String typingMsg = typingIndicator.equals(Member.TYPING_INDICATOR.ON) ? member.getName() + " is typing" : null;
-                      typingNotificationTxt.setText(typingMsg);
-                  }
-              });
-          }
-      };
-
-      conversation.addTypingListener(memberTypingListener);
-
-      typingSendListener = new TypingSendListener() {
-          @Override
-          public void onTypingSent(Member.TYPING_INDICATOR typingIndicator) {
-          }
-
-          @Override
-          public void onError(int errCode, String errMessage) {
-          }
-      };
-
-      chatBox.addTextChangedListener(new TextWatcher() {
-          @Override
-          public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-              //intentionally left blank
-          }
-
-          @Override
-          public void onTextChanged(CharSequence s, int start, int before, int count) {
-              //intentionally left blank
-          }
-
-          @Override
-          public void afterTextChanged(Editable s) {
-              if (s.length() > 0) {
-                  conversation.startTyping(typingSendListener);
-              } else {
-                  conversation.stopTyping(typingSendListener);
+  conversation.typingEvent().add(new ResultListener<Member>() {
+      @Override
+      public void onSuccess(final Member member) {
+          runOnUiThread(new Runnable() {
+              @Override
+              public void run() {
+                  String typingMsg = member.getTypingIndicator().equals(Member.TYPING_INDICATOR.ON) ? member.getName() + " is typing" : null;
+                  typingNotificationTxt.setText(typingMsg);
               }
-          }
-      });
+          });
+      }
+  }).addTo(subscriptions);
 
-      seenReceiptListener = new SeenReceiptListener() {
-          @Override
-          public void onTextSeen(Text text, Member member, SeenReceipt seenReceipt) {
-              runOnUiThread(new Runnable() {
-                  @Override
-                  public void run() {
-                      chatAdapter.notifyDataSetChanged();
-                  }
-              });
-          }
+  conversation.seenEvent().add(new ResultListener<Receipt<SeenReceipt>>() {
+      @Override
+      public void onSuccess(Receipt<SeenReceipt> result) {
+          runOnUiThread(new Runnable() {
+              @Override
+              public void run() {
+                  chatAdapter.notifyDataSetChanged();
+              }
+          });
+      }
+  }).addTo(subscriptions);
+}
 
-          @Override
-          public void onImageSeen(Image image, Member member, SeenReceipt seenReceipt) {
-              //intentionally left blank
-          }
-      };
+private void sendTypeIndicator(Member.TYPING_INDICATOR typingIndicator) {
+    switch (typingIndicator){
+        case ON: {
+            conversation.startTyping(new RequestHandler<Member.TYPING_INDICATOR>() {
+                @Override
+                public void onSuccess(Member.TYPING_INDICATOR typingIndicator) {
+                    //intentionally left blank
+                }
 
-      conversation.addSeenReceiptListener(seenReceiptListener);
+                @Override
+                public void onError(NexmoAPIError apiError) {
+                    logAndShow("Error start typing: " + apiError.getMessage());
+                }
+            });
+            break;
+        }
+        case OFF: {
+            conversation.stopTyping(new RequestHandler<Member.TYPING_INDICATOR>() {
+                @Override
+                public void onSuccess(Member.TYPING_INDICATOR typingIndicator) {
+                    //intentionally left blank
+                }
+
+                @Override
+                public void onError(NexmoAPIError apiError) {
+                    logAndShow("Error stop typing: " + apiError.getMessage());
+                }
+            });
+            break;
+        }
     }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-        conversation.removeEventListener(eventListener);
-        conversation.removeTypingListener(memberTypingListener);
-        conversation.removeSeenReceiptListener(seenReceiptListener);
-    }
-
 }
 ```
 
-For MemberTypingListener, when `onTyping` fires, we're receiving a typing event. Typing events can either be on or off. If the typing is on then we want to show the member name of who is typing. If the event tells us that the typing indicator is off, then we'll set the typingNotificationTxt to null. We can tell the Conversation SDK when a member is typing using Android's `addTextChangedListener`. We'll attach TextWatcher to the `chatBox`. In the `afterTextChanged` callback we'll look at the length of the text in the EditText. If the text is greater than 0, we know that the user is still typing. The length of the string in the edit text will be 0 when we call `chatBox.setText(null);` in the `sendMessage()` method. Finally we'll add the `SeenReceiptListener` so the SDK knows to mark messages as read as we send them.
+We can tell the Conversation SDK when a member is typing using `TextView`'s `addTextChangedListener`. We'll attach a `TextWatcher` to the `chatBox`. In the `afterTextChanged` callback we'll look at the length of the text in the EditText. If the text is greater than 0, we know that the user is still typing. Depending on if the user is typing we'll call `sendTypeIndicator()` with `Member.TYPING_INDICATOR.ON` or `Member.TYPING_INDICATOR.OFF` as an argument. The `sendTypeIndicator` method just fires either `conversation.startTyping()` or `conversation.stopTyping()` By adding a listener to `conversation.typingEvent()` we can then update our `typingNotificationTxt` with the correct message of who's typing or set the message to null if no one is typing.
+
+Finally we'll add a Listener to the `conversation.seenEvent()` so that when an event is marked as seen, we'll update the `ChatAdapter` and show the events as seen in our UI.
 
 
 ### 2.6 - Marking Text messages as seen
@@ -451,61 +407,57 @@ We'll only want to mark our messages as read when the other user has seen the me
 public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder> {
 
     private static final String TAG = "ChatAdapter";
-    private List<Text> messages;
     private Member self;
-    private MarkedAsSeenListener markedAsSeenListener = new MarkedAsSeenListener() {
-        @Override
-        public void onMarkedAsSeen() {
-        }
+    private List<Event> events = new ArrayList<>();
 
-        @Override
-        public void onError(int errCode, String errMessage) {
-            Log.d(TAG, "Error onMarkedAsSeen: " + errMessage);
-        }
-    };
-
-    public ChatAdapter(List<Text> texts, Member self) {
-        messages = texts;
-        this.self = self;
+    public ChatAdapter(Conversation conversation) {
+        self = conversation.getSelf();
+        events = conversation.getEvents();
     }
 
     ...
 
     @Override
     public void onBindViewHolder(ChatAdapter.ViewHolder holder, int position) {
-        Text textMessage = messages.get(position);
-        if (!textMessage.getMember().equals(self)) {
-            textMessage.markAsSeen(markedAsSeenListener);
-        }
-        if (textMessage.getType().equals(EventType.TEXT)) {
-            holder.text.setText(textMessage.getText());
-            if (!textMessage.getSeenReceipts().isEmpty()) {
+        if (events.get(position).getType().equals(EventType.TEXT)) {
+            final Text textMessage = (Text) events.get(position);
+            if (!textMessage.getMember().equals(self) && !memberHasSeen(textMessage)) {
+                textMessage.markAsSeen(new RequestHandler<SeenReceipt>() {
+                    @Override
+                    public void onSuccess(SeenReceipt result) {
+                        //Left blank
+                    }
+
+                    @Override
+                    public void onError(NexmoAPIError apiError) {
+                        Log.d(TAG, "mark as seen onError: " + apiError.getMessage());
+                    }
+                });
+            }
+            holder.text.setText(textMessage.getMember().getName() + ": " + textMessage.getText());
+            if (textMessage.getSeenReceipts().isEmpty()) {
+                holder.seenIcon.setVisibility(View.INVISIBLE);
+            } else {
                 holder.seenIcon.setVisibility(View.VISIBLE);
             }
         }
     }
 
+    private boolean memberHasSeen(Text textMessage) {
+      boolean seen = false;
+      for (SeenReceipt receipt : textMessage.getSeenReceipts()) {
+          if (receipt.getMember().equals(self)) {
+              seen = true;
+              break;
+          }
+      }
+      return seen;
+    }
     ...
 }
 ```
 
-As you can see we've added two new member variables to our ChatAdapter `Member self` & `MarkedAsSeenListener markedAsSeenListener`. We've also added `Member self` to our constructor.
-
-We've also made some changes to the `onBindViewHolder` method. The first is that we only want to mark a message as read if the sender of the message is not our `self`. That's why `!textMessage.getMember().equals(self)` is there. Then, we only want to show the `seenIcon` if the message has been marked as read. That's what `!textMessage.getSeenReceipts().isEmpty()` is for.
-
-We'll need to update our references to the `ChatAdapter` in `ChatActivity` so let's do so.
-
-```java
-//ChatActivity.java
-@Override
-protected void onCreate(Bundle savedInstanceState) {
-    super.onCreate(savedInstanceState);
-
-    ...
-    chatAdapter = new ChatAdapter(texts, conversation.getSelf());
-    ...
-}
-```
+We've added `Member self` to our constructor and as a member variable to the `ChatAdapter`. We've also made some changes to the `onBindViewHolder` method. Before we start marking something as read, we want to ensure that we're referring to a `Text` message. That's what the `events.get(position).getType().equals(EventType.TEXT)` check is doing. We only want to mark a message as read if it the sender of the message is not our `self`. That's why `!textMessage.getMember().equals(self)` is there. We also don't want to mark something as read if it's already been marked read. The `memberHasSeen` method looks up all of the `SeenReceipt`s and will only mark the method as read if the current user hasn't created a `SeenReceipt`. Then, we only want to show the `seenIcon` if the message has been marked as read. That's what `!textMessage.getSeenReceipts().isEmpty()` is for.
 
 # Trying it out
 

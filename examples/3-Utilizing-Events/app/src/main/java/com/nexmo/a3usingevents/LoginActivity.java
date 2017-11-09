@@ -184,9 +184,24 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     private void goToConversation(final Conversation conversation) {
-        Intent intent = new Intent(LoginActivity.this, ChatActivity.class);
-        intent.putExtra("CONVERSATION_ID", conversation.getConversationId());
-        startActivity(intent);
+        conversation.updateEvents(null, null, new RequestHandler<Conversation>() {
+            @Override
+            public void onError(NexmoAPIError apiError) {
+                logAndShow("Error Updating Conversation: " + apiError.getMessage());
+            }
+
+            @Override
+            public void onSuccess(final Conversation result) {
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        Intent intent = new Intent(LoginActivity.this, ChatActivity.class);
+                        intent.putExtra("CONVERSATION_ID", conversation.getConversationId());
+                        startActivity(intent);
+                    }
+                });
+            }
+        });
     }
 
     private void showLoginSuccessAndAddInvitationListener(final User user) {

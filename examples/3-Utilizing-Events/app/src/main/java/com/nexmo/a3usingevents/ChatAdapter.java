@@ -45,7 +45,7 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder> {
     public void onBindViewHolder(ChatAdapter.ViewHolder holder, int position) {
         if (events.get(position).getType().equals(EventType.TEXT)) {
             final Text textMessage = (Text) events.get(position);
-            if (textMessage.getSeenReceipts().isEmpty() && !textMessage.getMember().equals(self)) {
+            if (!textMessage.getMember().equals(self) && !memberHasSeen(textMessage)) {
                 textMessage.markAsSeen(new RequestHandler<SeenReceipt>() {
                     @Override
                     public void onSuccess(SeenReceipt result) {
@@ -55,7 +55,6 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder> {
                     @Override
                     public void onError(NexmoAPIError apiError) {
                         Log.d(TAG, "mark as seen onError: " + apiError.getMessage());
-                        Log.d(TAG, "self is:" + self.getName() + ". owner/message: " + textMessage.getMember().getName() + textMessage.getText());
                     }
                 });
             }
@@ -68,15 +67,21 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder> {
         }
     }
 
+    private boolean memberHasSeen(Text textMessage) {
+        boolean seen = false;
+        for (SeenReceipt receipt : textMessage.getSeenReceipts()) {
+            if (receipt.getMember().equals(self)) {
+                seen = true;
+                break;
+            }
+        }
+        return seen;
+    }
+
     @Override
     public int getItemCount() {
         return events.size();
     }
-
-    public void setEvents(List<Event> events) {
-        this.events = events;
-    }
-
 
     public class ViewHolder extends RecyclerView.ViewHolder {
         private final TextView text;

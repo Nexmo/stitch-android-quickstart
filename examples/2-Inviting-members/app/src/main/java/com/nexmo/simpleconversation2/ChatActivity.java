@@ -17,8 +17,11 @@ import com.nexmo.sdk.conversation.client.Image;
 import com.nexmo.sdk.conversation.client.Member;
 import com.nexmo.sdk.conversation.client.Text;
 import com.nexmo.sdk.conversation.client.event.EventListener;
+import com.nexmo.sdk.conversation.client.event.EventType;
 import com.nexmo.sdk.conversation.client.event.NexmoAPIError;
 import com.nexmo.sdk.conversation.client.event.RequestHandler;
+import com.nexmo.sdk.conversation.client.event.ResultListener;
+import com.nexmo.sdk.conversation.core.SubscriptionList;
 
 public class ChatActivity extends AppCompatActivity {
     private static final String TAG = ChatActivity.class.getSimpleName();
@@ -29,7 +32,7 @@ public class ChatActivity extends AppCompatActivity {
 
     private ConversationClient conversationClient;
     private Conversation conversation;
-    private EventListener eventListener;
+    private SubscriptionList subscriptions = new SubscriptionList();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -56,9 +59,9 @@ public class ChatActivity extends AppCompatActivity {
     }
 
     @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        conversation.removeEventListener(eventListener);
+    protected void onPause() {
+        super.onPause();
+        subscriptions.unsubscribeAll();
     }
 
     private void sendMessage() {
@@ -81,56 +84,21 @@ public class ChatActivity extends AppCompatActivity {
     }
 
     private void addListener() {
-        eventListener = new EventListener() {
+        conversation.messageEvent().add(new ResultListener<Event>() {
             @Override
-            public void onSuccess(Object result) {
-
-            }
-
-            @Override
-            public void onError(NexmoAPIError apiError) {
-                logAndShow("onError: " + apiError.getMessage());
-
-            }
-
-            @Override
-            public void onTextReceived(Text message) {
+            public void onSuccess(Event message) {
                 showMessage(message);
             }
-
-            @Override
-            public void onTextDeleted(Text message, Member member) {
-
-            }
-
-            @Override
-            public void onImageReceived(Image image) {
-
-            }
-
-            @Override
-            public void onImageDeleted(Image message, Member member) {
-
-            }
-
-            @Override
-            public void onImageDownloaded(Image image) {
-
-            }
-        };
-
-        conversation.addEventListener(eventListener);
+            });
     }
 
-    private void showMessage(final Text message) {
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                msgEditTxt.setText(null);
-                String prevText = chatTxt.getText().toString();
-                chatTxt.setText(prevText + "\n" + message.getMember().getName() + ": " + message.getText());
-            }
-        });
+    private void showMessage(final Event message) {
+        if (message.getType().equals(EventType.TEXT)) {
+            Text text = (Text) message;
+            msgEditTxt.setText(null);
+            final String prevText = chatTxt.getText().toString();
+            chatTxt.setText(prevText + "\n" + text.getText());
+        }
     }
 
     private void logAndShow(final String message) {

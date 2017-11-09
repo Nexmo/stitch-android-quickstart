@@ -13,13 +13,12 @@ import android.widget.Toast;
 import com.nexmo.sdk.conversation.client.Conversation;
 import com.nexmo.sdk.conversation.client.ConversationClient;
 import com.nexmo.sdk.conversation.client.Event;
-import com.nexmo.sdk.conversation.client.Image;
-import com.nexmo.sdk.conversation.client.Member;
 import com.nexmo.sdk.conversation.client.Text;
-import com.nexmo.sdk.conversation.client.event.EventListener;
 import com.nexmo.sdk.conversation.client.event.EventType;
 import com.nexmo.sdk.conversation.client.event.NexmoAPIError;
 import com.nexmo.sdk.conversation.client.event.RequestHandler;
+import com.nexmo.sdk.conversation.client.event.ResultListener;
+import com.nexmo.sdk.conversation.core.SubscriptionList;
 
 public class ChatActivity extends AppCompatActivity {
     private final String TAG = ChatActivity.this.getClass().getSimpleName();
@@ -30,7 +29,7 @@ public class ChatActivity extends AppCompatActivity {
 
     private ConversationClient conversationClient;
     private Conversation conversation;
-    private EventListener eventListener;
+    private SubscriptionList subscriptions = new SubscriptionList();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -62,9 +61,9 @@ public class ChatActivity extends AppCompatActivity {
     }
 
     @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        conversation.removeEventListener(eventListener);
+    protected void onPause() {
+        super.onPause();
+        subscriptions.unsubscribeAll();
     }
 
     private void sendMessage() {
@@ -84,49 +83,21 @@ public class ChatActivity extends AppCompatActivity {
     }
 
     private void addListener() {
-        eventListener = new EventListener() {
+        conversation.messageEvent().add(new ResultListener<Event>() {
             @Override
-            public void onSuccess(Object result) {
-                //intentionally left blank
-            }
-
-            @Override
-            public void onError(NexmoAPIError apiError) {
-                logAndShow("Error adding EventListener: " + apiError.getMessage());
-            }
-
-            @Override
-            public void onImageDownloaded(Image image) {
-                //intentionally left blank
-            }
-
-            @Override
-            public void onTextReceived(Text message) {
+            public void onSuccess(Event message) {
                 showMessage(message);
             }
-
-            @Override
-            public void onTextDeleted(Text message, Member member) {
-                //intentionally left blank
-            }
-
-            @Override
-            public void onImageReceived(Image image) {
-                //intentionally left blank
-            }
-
-            @Override
-            public void onImageDeleted(Image message, Member member) {
-                //intentionally left blank
-            }
-        };
-        conversation.addEventListener(eventListener);
+        }).addTo(subscriptions);
     }
 
-    private void showMessage(final Text message) {
-        msgEditTxt.setText(null);
-        final String prevText = chatTxt.getText().toString();
-        chatTxt.setText(prevText + "\n" + message.getText());
+    private void showMessage(final Event message) {
+        if (message.getType().equals(EventType.TEXT)) {
+            Text text = (Text) message;
+            msgEditTxt.setText(null);
+            final String prevText = chatTxt.getText().toString();
+            chatTxt.setText(prevText + "\n" + text.getText());
+        }
     }
 
     private void logAndShow(final String message) {
