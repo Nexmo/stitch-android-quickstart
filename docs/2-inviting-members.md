@@ -118,7 +118,7 @@ private String authenticate(String username) {
     }
 
 private void loginAsUser(String token) {
-    conversationClient.login(token, new LoginListener() {
+    conversationClient.login(token, new RequestHandler<User>() {
         @Override
         public void onSuccess(User user) {
             showLoginSuccessAndAddInvitationListener(user);
@@ -128,34 +128,6 @@ private void loginAsUser(String token) {
         @Override
         public void onError(NexmoAPIError apiError) {
             logAndShow("Login Error: " + apiError.getMessage());
-        }
-
-        @Override
-        public void onUserAlreadyLoggedIn(User user) {
-            showLoginSuccessAndAddInvitationListener(user);
-            retrieveConversations();
-        }
-
-        @Override
-        public void onTokenInvalid() {
-            logAndShow("Token Invalid.");
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    loginTxt.setText("Token Invalid");
-                }
-            });
-        }
-
-        @Override
-        public void onTokenExpired() {
-            logAndShow("Token Expired. Generate new token.");
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    loginTxt.setText("Token Expired. Generate new token.");
-                }
-            });
         }
     });
 }

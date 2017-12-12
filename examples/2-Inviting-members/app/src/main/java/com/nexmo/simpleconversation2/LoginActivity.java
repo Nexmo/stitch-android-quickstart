@@ -17,7 +17,6 @@ import com.nexmo.sdk.conversation.client.Conversation;
 import com.nexmo.sdk.conversation.client.ConversationClient;
 import com.nexmo.sdk.conversation.client.Member;
 import com.nexmo.sdk.conversation.client.User;
-import com.nexmo.sdk.conversation.client.event.LoginListener;
 import com.nexmo.sdk.conversation.client.event.NexmoAPIError;
 import com.nexmo.sdk.conversation.client.event.RequestHandler;
 import com.nexmo.sdk.conversation.client.event.ResultListener;
@@ -86,7 +85,7 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     private void loginAsUser(String token) {
-        conversationClient.login(token, new LoginListener() {
+        conversationClient.login(token, new RequestHandler<User>() {
             @Override
             public void onSuccess(User user) {
                 showLoginSuccessAndAddInvitationListener(user);
@@ -96,24 +95,6 @@ public class LoginActivity extends AppCompatActivity {
             @Override
             public void onError(NexmoAPIError apiError) {
                 logAndShow("Login Error: " + apiError.getMessage());
-            }
-
-            @Override
-            public void onUserAlreadyLoggedIn(User user) {
-                showLoginSuccessAndAddInvitationListener(user);
-                retrieveConversations();
-            }
-
-            @Override
-            public void onTokenInvalid() {
-                logAndShow("Token Invalid.");
-                loginTxt.setText("Token Invalid");
-            }
-
-            @Override
-            public void onTokenExpired() {
-                logAndShow("Token Expired. Generate new token.");
-                loginTxt.setText("Token Expired. Generate new token.");
             }
         });
     }

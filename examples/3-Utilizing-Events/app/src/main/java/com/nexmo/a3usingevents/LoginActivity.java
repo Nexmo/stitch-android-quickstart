@@ -17,7 +17,6 @@ import com.nexmo.sdk.conversation.client.Conversation;
 import com.nexmo.sdk.conversation.client.ConversationClient;
 import com.nexmo.sdk.conversation.client.Member;
 import com.nexmo.sdk.conversation.client.User;
-import com.nexmo.sdk.conversation.client.event.LoginListener;
 import com.nexmo.sdk.conversation.client.event.NexmoAPIError;
 import com.nexmo.sdk.conversation.client.event.RequestHandler;
 import com.nexmo.sdk.conversation.client.event.ResultListener;
@@ -93,13 +92,7 @@ public class LoginActivity extends AppCompatActivity {
 
     private void loginAsUser(String token) {
         loginTxt.setText("Logging in...");
-        conversationClient.login(token, new LoginListener() {
-            @Override
-            public void onSuccess(User user) {
-                showLoginSuccessAndAddInvitationListener(user);
-                retrieveConversations();
-            }
-
+        conversationClient.login(token, new RequestHandler<User>() {
             @Override
             public void onError(final NexmoAPIError apiError) {
                 runOnUiThread(new Runnable() {
@@ -112,31 +105,9 @@ public class LoginActivity extends AppCompatActivity {
             }
 
             @Override
-            public void onUserAlreadyLoggedIn(User user) {
+            public void onSuccess(User user) {
                 showLoginSuccessAndAddInvitationListener(user);
                 retrieveConversations();
-            }
-
-            @Override
-            public void onTokenInvalid() {
-                logAndShow("Token Invalid.");
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        loginTxt.setText("Token Invalid");
-                    }
-                });
-            }
-
-            @Override
-            public void onTokenExpired() {
-                logAndShow("Token Expired. Generate new token.");
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        loginTxt.setText("Token Expired. Generate new token.");
-                    }
-                });
             }
         });
     }
