@@ -1,6 +1,6 @@
 # Getting Started with Nexmo In-App Voice and the Android SDK
 
-In this getting started guide we'll cover adding audio events to the Conversation we created in the [simple conversation with events](TODO) getting started guide. We'll deal with media events, the ones that come via the conversation, and the ones we send to the conversation.
+In this getting started guide we'll cover adding audio events to the Conversation we created in the previous quickstarts. We'll deal with media events, the ones that come via the conversation, and the ones we send to the conversation.
 
 ## Concepts
 
@@ -11,11 +11,11 @@ This guide will introduce you to the following concepts.
 
 ## Before you begin
 
-- Ensure you have run through the [previous guide](TODO)
+- Ensure you have run through the [previous quickstarts](https://developer.nexmo.com/stitch/in-app-messaging/guides/3-utilizing-events?platform=android)
 
 ## 1 - Update the Android App
 
-We will use the application we already created for [the third getting started guide](TODO). All the basic setup has been done in the previous guides and should be in place. We can now focus on updating the client-side application.
+We will use the application we already created for the previous quickstarts. All the basic setup has been done in the previous guides and should be in place. We can now focus on updating the client-side application.
 
 ### 1.1 - Update permissions in `AndroidManifest`
 
@@ -71,7 +71,7 @@ I've added an icon using [Vector Assets](https://developer.android.com/studio/wr
 
 ### 1.3 - Requesting Audio permissions
 
-Before we can enable In-App Voice in our app we need to check or request the `RECORD_AUDIO` permission. To check that we have permission, we'll call the `ContextCompat.checkSelfPermission()` method. If the user has denied the request we'll show our reasoning if `ActivityCompat.shouldShowRequestPermissionRationale()` is true. If we need to request the permission we'll do so with `ActivityCompat.requestPermissions()` We'll handle this logic in the `requestAudio()` method. We'll also need to create a constant `PERMISSION_REQUEST_AUDIO` to check if the permission was granted or not.
+Before we can enable In-App Voice in our app we need to check or request the `RECORD_AUDIO` permission. To check that we have permission, we'll call the `ContextCompat.checkSelfPermission()` method. If `ActivityCompat.shouldShowRequestPermissionRationale()` is true, then the user has approved the permission. But if it's false, the permission is denied and we'll show our reasoning to enable it. If we need to request the permission we'll do so with `ActivityCompat.requestPermissions()`. We'll handle this logic in the `requestAudio()` method. We'll also need to create a constant `PERMISSION_REQUEST_AUDIO` to check if the permission was granted or not.
 
 For more info about permissions check out the [Android Developers documentation.](https://developer.android.com/training/permissions/requesting.html)
 
@@ -95,7 +95,7 @@ private void requestAudio() {
 }
 ```
 
-After we ask the user for the `RECORD_AUDIO` permission we'll get the result of their decision in `onRequestPermissionsResult()` If they granted it we'll call `toggleAudio()` to enable/disable audio in the app. If the user didn't grant the decision we'll pop a toast and log out that we need to enable audio permissions to continue.
+After we ask the user for the `RECORD_AUDIO` permission we'll get the result of their decision in `onRequestPermissionsResult()` If they granted it we'll call `toggleAudio()` to enable/disable audio in the app. If the user didn't grant the permission we'll pop a toast and log out that we need to enable audio permissions to continue.
 
 ```java
 // ChatActivity.java
@@ -122,11 +122,11 @@ public void onRequestPermissionsResult(int requestCode, @NonNull String[] permis
 
 ### 1.4 - Enabling and disabling audio
 
-Now we can implement the `toggleAudio()` method. We'll use a constant `AUDIO_ENABLED` to not if audio is enabled or not and initialize it to false. When we change the state of audio in the app we'll change the boolean.
+Now we can implement the `toggleAudio()` method. We'll use a constant `AUDIO_ENABLED` to note if audio is enabled or not and initialize it to false. When we change the state of audio in the app we'll change the boolean.
 
 At this point, enabling and disabling In-App Voice in your app is as simple as calling `conversation.media(Conversation.MEDIA_TYPE.AUDIO).enable()` or  `conversation.media(Conversation.MEDIA_TYPE.AUDIO).disable()`. `.disable()` takes a `RequestHandler` as an argument with `onSuccess()` and `onError()` callbacks.
 
-The `.enable()` methods takes a `AudioCallEventListener` with multiple callbacks that handle the state of audio. The audio will enter a `onRinging()` state then `onCallConnected()` when the user has joined the audio channel. If the user ends disables the audio `onCallEnded()` will fire. If any kind of error while the user uses In-App voice, then the `onGeneralCallError()` callback will fire. `onAudioRouteChange()` is called when the audio manager reports an audio device change, for example when switching from the in ear speaker to a wired headset.
+The `.enable()` methods takes a `AudioCallEventListener` with multiple callbacks that handle the state of audio. The audio will enter a `onRinging()` state, then `onCallConnected()` when the user has joined the audio channel. If the user disables audio `onCallEnded()` will fire. If any kind of error occurs, then the `onGeneralCallError()` callback will fire. `onAudioRouteChange()` is called when the audio manager reports an audio device change, like when switching from the device's in ear speaker to a wired headset.
 
 ```java
 // ChatActivity.java
@@ -186,11 +186,13 @@ Now we could try out In-App Voice right now by launching the app on two devices 
 
 ## 2 - Showing `MemberMedia` events
 
-In the previous quickstart we added a `RecyclerView` to our app and showed the chat history by adding `ChatAdapter.java`. As a refresher, to observe events that happen in a conversation we've tapped into `conversation.messageEvent()` and added a `ResultListener` that's fired whenever there's new event. Up until now, the only events we've dealt with are `Text`. Now we're going to handle any `MemberMedia` events that get sent to a conversation.
+In the previous quickstart we added a `RecyclerView` to our app and showed the chat history by adding `ChatAdapter.java`. As a refresher, to observe events that happens in a conversation we've tapped into `conversation.messageEvent()` and added a `ResultListener` that's fired whenever there's new event. Up until now, the only events we've dealt with are `Text`. Now we're going to handle any `MemberMedia` events that get sent to a conversation.
 
 ### 2.1 - Handling `MemberMedia` events in `ChatAdapter.java`
 
-We're going to make some changes to the `onBindViewHolder()` method. Currently we check for `Text` events like so `if (events.get(position).getType().equals(EventType.TEXT))`. Now we need to add a check for `MemberMedia` events with an `else if`.
+We're going to make some changes to the `onBindViewHolder()` method. Currently we check for `Text` events like so: `if (events.get(position).getType().equals(EventType.TEXT))`.
+
+Now we need to add a check for `MemberMedia` events with an `else if`.
 
 ```java
 // ChatAdapter.java
@@ -212,4 +214,6 @@ After we check that the event `equals(EventType.MEMBER_MEDIA)` we'll show a mess
 ## 3 Try it out!
 
 After this you should be able to run the app in two different android devices or emulators. Try enabling or disabling audio and speaking to yourself or a friend!
+
+
 _Note: Don't forget to generate new JWTs for you users if it's been over 24 hours since you last generated the user JWTs._
