@@ -1,0 +1,10 @@
+
+examples/4-Enable-Audio/.nexmo-app
+
+examples/4-Enable-Audio/.gradle/
+
+examples/4-Enable-Audio/app/build/
+
+examples/4-Enable-Audio/build/
+
+examples/4-Enable-Audio/private.key
