@@ -215,5 +215,6 @@ After we check that the event `equals(EventType.MEMBER_MEDIA)` we'll show a mess
 
 After this you should be able to run the app in two different android devices or emulators. Try enabling or disabling audio and speaking to yourself or a friend!
 
-
 _Note: Don't forget to generate new JWTs for you users if it's been over 24 hours since you last generated the user JWTs._
+
+[View the source code for this example](https://github.com/Nexmo/conversation-android-quickstart)
