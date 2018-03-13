@@ -1,4 +1,4 @@
-# Nexmo Conversation SDK for Android Beta
+# Nexmo Stitch SDK for Android Quickstart
 
 This is the Android SDK for Nexmo Stitch. Read more about:
 - [In-App Messaging and Voice](#about-in-app-messaging-and-voice)
@@ -11,7 +11,7 @@ This is the Android SDK for Nexmo Stitch. Read more about:
 
 Nexmo Stitch enables you to build conversation features where communication can take place across multiple platforms. The context of the conversations is maintained though each communication event taking place within a conversation, no matter the medium.
 
-Currently the Conversation API offers IP voice and IP messaging with the following features:
+Currently the Stitch API offers IP voice and IP messaging with the following features:
 
 - Conversation creation and management
 - Sending and receiving text
@@ -43,10 +43,10 @@ You can also find the completed examples in the [examples directory](examples).
 
 ## SDK API Reference docs
 
-The [Nexmo Conversation Android SDK API Reference docs](https://developer.nexmo.com/sdk/stitch/android/reference/packages.html) are available online. You can also view the docs from within Android Studio. If you do not have access to the docs, please contact [ea-support@nexmo.com](mailto:ea-support@nexmo.com)
+The [Nexmo Stitch Android SDK API Reference docs](https://developer.nexmo.com/sdk/stitch/android/reference/packages.html) are available online. You can also view the docs from within Android Studio. If you do not have access to the docs, please contact [ea-support@nexmo.com](mailto:ea-support@nexmo.com)
 
 ## Additional Resources
 
 * [Nexmo CLI](https://github.com/Nexmo/nexmo-cli/tree/beta)
-* [Nexmo Conversation iOS Quickstart](https://github.com/nexmo/conversation-ios-quickstart)
-* [Nexmo Conversation JS Quickstart](https://github.com/nexmo/conversation-js-quickstart)
+* [Nexmo Stitch iOS Quickstart](https://github.com/nexmo/conversation-ios-quickstart)
+* [Nexmo Stitch JS Quickstart](https://github.com/nexmo/conversation-js-quickstart)
