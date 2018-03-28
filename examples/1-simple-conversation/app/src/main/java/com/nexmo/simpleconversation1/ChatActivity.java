@@ -18,7 +18,7 @@ import com.nexmo.sdk.conversation.client.event.EventType;
 import com.nexmo.sdk.conversation.client.event.NexmoAPIError;
 import com.nexmo.sdk.conversation.client.event.RequestHandler;
 
-public class ChatActivity extends AppCompatActivity implements ReceiveMessageHandler {
+public class ChatActivity extends AppCompatActivity {
     private final String TAG = ChatActivity.this.getClass().getSimpleName();
 
     private TextView chatTxt;
@@ -49,7 +49,7 @@ public class ChatActivity extends AppCompatActivity implements ReceiveMessageHan
         String conversationId = intent.getStringExtra("CONVERSATION-ID");
         conversation = conversationClient.getConversation(conversationId);
 
-        getLifecycle().addObserver(new StitchListenerComponent(conversation, this));
+        getLifecycle().addObserver(new StitchListenerComponent(conversation, msgEditTxt, chatTxt));
     }
 
     private void sendMessage() {
@@ -66,16 +66,6 @@ public class ChatActivity extends AppCompatActivity implements ReceiveMessageHan
                 logAndShow("Error sending message: " + apiError.getMessage());
             }
         });
-    }
-
-    @Override
-    public void showMessage(final Event message) {
-        if (message.getType().equals(EventType.TEXT)) {
-            Text text = (Text) message;
-            msgEditTxt.setText(null);
-            final String prevText = chatTxt.getText().toString();
-            chatTxt.setText(prevText + "\n" + text.getText());
-        }
     }
 
     private void logAndShow(final String message) {
