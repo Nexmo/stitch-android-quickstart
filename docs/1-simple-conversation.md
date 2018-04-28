@@ -1,10 +1,10 @@
 ## Getting Started with the Nexmo Conversation Android SDK
 
-In this getting started guide we'll demonstrate how to build a simple conversation app with IP messaging using the Nexmo Conversation Android SDK.
+In this getting started guide, we'll demonstrate how to build a simple conversation app with IP messaging using the Nexmo Conversation Android SDK.
 
 ## Concepts
 
-This guide will introduce you to the following concepts.
+This guide will introduce you to the following concepts:
 
 * **Nexmo Applications** - contain configuration for the application that you are building
 * **JWTs** ([JSON Web Tokens](https://jwt.io/)) - the Conversation API uses JWTs for authentication. JWTs contain all the information the Nexmo platform needs to authenticate requests. JWTs also contain information such as the associated Applications, Users and permissions.
@@ -14,8 +14,8 @@ This guide will introduce you to the following concepts.
 
 ### Before you begin
 
-* Ensure you have Node.JS and NPM installed (you'll need it for the CLI)
-* Ensure you have Android Studio installed
+* Ensure you have [Node.JS](https://nodejs.org) and NPM installed (you'll need it for the CLI)
+* Ensure you have [Android Studio](https://developer.android.com/studio/index.html) installed
 * Create a free Nexmo account - [signup](https://dashboard.nexmo.com)
 * Install the Nexmo CLI:
 
@@ -404,7 +404,7 @@ We'll make a `ChatActivity` with this as the layout
 
 ### 2.7 Create the ChatActivity
 
-Like last time we'll wire up the views in `ChatActivity.java` We also need to grab the `conversationId` from the incoming intent so we can look up the appropriate conversation.
+Like last time, we'll wire up the views in `ChatActivity.java`. We also need to grab the `conversationId` from the incoming intent so we can look up the appropriate conversation.
 
 ```java
 //ChatActivity.java
@@ -451,7 +451,8 @@ public class ChatActivity extends AppCompatActivity {
 
 ### 2.8 - Sending `text` Events
 
-To send a message we simply need to call `sendText` on our instance of `Conversation conversation`. `sendText` takes two arguments, a `String message`, and an `EventSendListener`
+To send a message we simply need to call `sendText` on our instance of `Conversation conversation`. `sendText` takes two arguments, a `String message`, and an `EventSendListener`.
+
 In the `EventSendListener` we'll get two call backs: `onSuccess()` and `onError()`. If there's an error we'll just show an error in the logs and in a toast. We'll just log out the message in the `onSuccess()` callback since we'll handle messages as they're received instead of as they're sent. You might notice that I'm checking the type of the message before I log it out. That's because a `Message` can be `Text` or an `Image`. For now we'll just worry about `Text`.
 
 ```java
@@ -501,9 +502,9 @@ private void showMessage(final Event message) {
 Adding a new `ResultListener<Event>` to a `conversation.messageEvent()` allows us to add a callback when a message is received.
 There's only one callback `onSuccess` that gets fired whenever an `Event` is received. An `Event` can be some text or an image. When `onSuccess` is fired we'll call our `showMessage()` method.
 
-You'll also notice this bit of code `.addTo(subscriptions)` We'll talk more about that in the next section.
+You'll also notice this bit of code `.addTo(subscriptions)`. We'll talk more about that in the next section.
 
-Before we handle the `message` we need to ensure that it's a `Text` message. As stated earlier, `Event`s can also be an image. We won't implement images in this guide, but it's good practice for the future. `showMessage()` removes the text from the `msgEditTxt` and appends the text from the `message` to our `chatTxt` along with any previous messages.
+Before we handle the `message` we need to ensure that it is a `Text` message. As stated earlier, `Event`s can also be an image. We won't implement images in this guide, but it's good practice for the future. `showMessage()` removes the text from the `msgEditTxt` and appends the text from the `message` to our `chatTxt` along with any previous messages.
 
 ### 2.10 - Adding and removing listeners
 
@@ -524,7 +525,7 @@ protected void onPause() {
 }
 ```
 
-When we created our `ChatActivity` we added a member variable to our activity with `SubscriptionList subscriptions = new SubscriptionList();` A `SubscriptionList` is a utility list that the library provides to make it easier to manage subscriptions within the app lifecycle. Basically, when we add a new `ResultListener` we should call `.addTo(subscriptions)` on that `ResultListener` so that we can call `subscriptions.unsubscribeAll();` when our activity winds down. We do this to minimize memory leaks.
+When we created our `ChatActivity`, we added a member variable to our activity with `SubscriptionList subscriptions = new SubscriptionList();` A `SubscriptionList` is a utility list that the library provides to make it easier to manage subscriptions within the app lifecycle. Basically, when we add a new `ResultListener` we should call `.addTo(subscriptions)` on that `ResultListener` so that we can call `subscriptions.unsubscribeAll();` when our activity winds down. We do this to minimize memory leaks.
 
 ## 3.0 - Trying it out
 
