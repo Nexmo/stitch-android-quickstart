@@ -23,15 +23,15 @@ If you're continuing on from the previous guide you may already have a `APP_JWT`
 $ APP_JWT="$(nexmo jwt:generate ./private.key application_id=YOUR_APP_ID exp=$(($(date +%s)+86400)))"
 ```
 
-You may also need to regenerate the users JWTs. See quickstarts 1 and 2 for how to do so.
+You may also need to regenerate the user's JWTs. See quickstarts 1 and 2 for how to do so.
 
 ## 2 Update the Android App
 
-We will use the application we already created for quickstarts 1 and 2. With the basic setup in place we can now focus on updating the client-side application. We can leave the LoginActivity as is. For this demo, we'll solely focus on the ChatActivity.
+We will use the application we already created for quickstarts 1 and 2. With the basic setup in place we can now focus on updating the client-side application. We can leave the `LoginActivity` as is. For this demo, we'll solely focus on the `ChatActivity`.
 
 ### 2.1 Updating the ChatActivity layout
 
-We're going to be adding some new elements to our chat app so let's update our layout to reflect them. The updated layout should look like so:
+We are going to be adding some new elements to our chat app so let's update our layout to reflect them. The updated layout should look like so:
 
 ```xml
 <!--activity_chat.xml-->
@@ -84,12 +84,12 @@ We're going to be adding some new elements to our chat app so let's update our l
 </LinearLayout>
 ```
 
-Notice that we've added the RecyclerView as well as a TextView with the id `typing_notification`. We'll load the messages in the RecyclerView and show a message in the `typing_notification` TextView when a user is typing.
+Notice that we've added the `RecyclerView` as well as a `TextView` with the id `typing_notification`. We'll load the messages in the `RecyclerView` and show a message in the `typing_notification` `TextView` when a user is typing.
 
 
 ### 2.2 Adding the new UI to the ChatActivity
 
-In the previous examples we showed messages by adding to a TextView. For this example we'll show you how to use the Conversation SDK in a RecyclerView. Let's add our new UI elements to the ChatActivity:
+In the previous examples we showed messages by adding to a `TextView`. For this example. we'll show you how to use the Conversation SDK in a `RecyclerView`. Let's add our new UI elements to the ChatActivity:
 
 ```java
 //ChatActivity.java
@@ -155,7 +155,7 @@ public class ChatActivity extends AppCompatActivity {
 }
 ```
 
-We'll also need to attach the EventListener. We'll do so in `attachListeners()`
+We'll also need to attach the `EventListener`. We'll do so in `attachListeners()`:
 
 ```java
 @Override
@@ -189,7 +189,7 @@ protected void onPause() {
 
 ### 2.3 Creating the ChatAdapter and ViewHolder
 
-Our RecyclerView will need a Adapter and ViewHolder. We can use this:
+Our `RecyclerView` will need an `Adapter` and a `ViewHolder`. We can use this:
 
 ```java
 //ChatAdapter.java
@@ -238,7 +238,7 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder> {
 }
 ```
 
-We'll also need to create a layout for the ViewHolder. Our layout will have a textview to hold the message text. The layout will also have a check mark image that we can make visible or set the visibility to `gone` depending on if the other users of the chat have seen the message or not. The layout will look like so:
+We'll also need to create a layout for the `ViewHolder`. Our layout will have a textview to hold the message text. The layout will also have a check mark image that we can make visible or set the visibility to `gone` depending on if the other users of the chat have seen the message or not. The layout will look like this:
 
 ```xml
 <!-- layout/chat_item.xml -->
@@ -301,7 +301,7 @@ private void goToConversation(final Conversation conversation) {
 }
 ```
 
-Calling `updateEvents()` on a conversation retrieves the event history. You can pass in two `Event` ids into the `updateEvents()` method to tell it to only retrieve events within the timeframe of those IDs.  We'll pass `null` into the first two parameters instead since we want to fetch the whole history of the conversation. Now when we fire the intent and start the `ChatActivity` we'll have the history of the chat loaded into the RecyclerView.
+Calling `updateEvents()` on a conversation retrieves the event history. You can pass in two `Event` IDs into the `updateEvents()` method to tell it to only retrieve events within the timeframe of those IDs.  We'll pass `null` into the first two parameters instead since we want to fetch the whole history of the conversation. Now when we fire the intent and start the `ChatActivity` we'll have the history of the chat loaded into the `RecyclerView`.
 
 ### 2.5 - Adding Typing and Seen Listeners
 
@@ -457,11 +457,12 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder> {
 }
 ```
 
-We've added `Member self` to our constructor and as a member variable to the `ChatAdapter`. We've also made some changes to the `onBindViewHolder` method. Before we start marking something as read, we want to ensure that we're referring to a `Text` message. That's what the `events.get(position).getType().equals(EventType.TEXT)` check is doing. We only want to mark a message as read if it the sender of the message is not our `self`. That's why `!textMessage.getMember().equals(self)` is there. We also don't want to mark something as read if it's already been marked read. The `memberHasSeen` method looks up all of the `SeenReceipt`s and will only mark the method as read if the current user hasn't created a `SeenReceipt`. Then, we only want to show the `seenIcon` if the message has been marked as read. That's what `!textMessage.getSeenReceipts().isEmpty()` is for.
+We've added `Member self` to our constructor and as a member variable to the `ChatAdapter`. We've also made some changes to the `onBindViewHolder` method. Before we start marking something as read, we want to ensure that we're referring to a `Text` message. That's what the `events.get(position).getType().equals(EventType.TEXT)` check is doing. We only want to mark a message as read if it the sender of the message is not our `self`. That's why `!textMessage.getMember().equals(self)` is there. We also don't want to mark something as read if it hass already been marked read. The `memberHasSeen` method looks up all of the `SeenReceipt`s and will only mark the method as read if the current user hasn't created a `SeenReceipt`. Then, we only want to show the `seenIcon` if the message has been marked as read. That's what `!textMessage.getSeenReceipts().isEmpty()` is for.
 
 # Trying it out
 
 Run the apps on both of your emulators. On one of them, login with the username "jamie". On the other emulator login with the username "alice"
+
 Once you've completed this quickstart, you can run the sample app on two different devices. You'll be able to login as a user, join an existing conversation, chat with users, show a typing indicator, and mark messages as read. Here's a gif of our quickstart in action.
 
 ![Awesome Chat](http://g.recordit.co/hfTUzwQYNH.gif)
