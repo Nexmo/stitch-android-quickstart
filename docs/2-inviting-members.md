@@ -138,7 +138,7 @@ We'll be running this device on two different devices (on an emulator or physica
 
 ### 2.2 Listening for Conversation invites and accepting them
 
-The next step is to update the login method to listen on the application with the ConversationInvitedListener. Once we receive an invite, we're going to automatically join the user to that Conversation.
+The next step is to update the login method to listen on the application with the `ConversationInvitedListener`. Once we receive an invite, we're going to automatically join the user to that Conversation.
 
 ```java
 //LoginActivity.java
@@ -196,9 +196,9 @@ private void retrieveConversations() {
 }
 ```
 
-There are two ways to see what conversations a member is a part of. `conversationClient.getConversations()` retrieves the full list of conversations the logged in user is a Member of asynchronously. If you want retrieve the list of conversations a user is a part of in a synchronous manner, you can call `conversationClient.getConversationList()`
+There are two ways to see what conversations a member is a part of. `conversationClient.getConversations()` retrieves the full list of conversations the logged-in user is a Member of asynchronously. If you want retrieve the list of conversations a user is a part of in a synchronous manner, you can call `conversationClient.getConversationList()`.
 
-If there wasn't an error retrieving the list of conversations, we'll check if the user has more than one conversation that they are a part of. If there is more than one conversation, then we'll show a dialog allowing the user to select a conversation to enter. If the user doesn't have any conversations then we'll show a message telling them so.
+If there wasn't an error retrieving the list of conversations, we'll check if the user has more than one conversation that they are a member of. If there is more than one conversation, then we'll show a dialog allowing the user to select a conversation to enter. If the user doesn't have any conversations then we'll show a message telling them so.
 
 For now, let's show the list of conversations.
 
@@ -268,6 +268,6 @@ Return to your emulators so you can see `alice` has a conversation listed now. Y
 
 # Trying it out
 
-Once you've completed this quickstart, you can run the sample app on two different devices. You'll be able to login as a user, join an existing conversation or receive invites, and chat with users. Here's a gif of our quickstart in action.
+Once you've completed this quickstart, you can run the sample app on two different devices. You'll be able to login as a user, join an existing conversation or receive invites, and chat with users. Here's a GIF of our quickstart in action.
 
 ![Awesome Chat](http://g.recordit.co/Us6wTTvKnI.gif)
