@@ -19,6 +19,7 @@ allprojects {
     repositories {
         google()
         jcenter()
+        //WebRTC dependency for Stitch
         maven { url 'https://artifactory.ess-dev.com/artifactory/gradle-dev' }
     }
 }

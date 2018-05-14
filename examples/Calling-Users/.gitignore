@@ -10,3 +10,4 @@
 .nexmo-app
 /app/build
 private.key
+/.idea

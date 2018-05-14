@@ -1,4 +1,4 @@
-package com.nexmo.enableaudio;
+package com.nexmo.callingusers;
 
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -21,6 +21,8 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.nexmo.sdk.conversation.client.Call;
+import com.nexmo.sdk.conversation.client.CallEvent;
 import com.nexmo.sdk.conversation.client.Conversation;
 import com.nexmo.sdk.conversation.client.ConversationClient;
 import com.nexmo.sdk.conversation.client.Event;
@@ -31,9 +33,10 @@ import com.nexmo.sdk.conversation.client.audio.AudioCallEventListener;
 import com.nexmo.sdk.conversation.client.event.NexmoAPIError;
 import com.nexmo.sdk.conversation.client.event.RequestHandler;
 import com.nexmo.sdk.conversation.client.event.ResultListener;
-import com.nexmo.sdk.conversation.client.event.container.Invitation;
 import com.nexmo.sdk.conversation.client.event.container.Receipt;
 import com.nexmo.sdk.conversation.core.SubscriptionList;
+
+import java.util.Collections;
 
 import static android.Manifest.permission.RECORD_AUDIO;
 
@@ -51,6 +54,8 @@ public class ChatActivity extends AppCompatActivity {
     private ConversationClient conversationClient;
     private Conversation conversation;
     private SubscriptionList subscriptions = new SubscriptionList();
+    private Call currentCall;
+    private Menu optionsMenu;
 
 
     @Override
@@ -60,6 +65,7 @@ public class ChatActivity extends AppCompatActivity {
 
         conversationClient = ((ConversationClientApplication) getApplication()).getConversationClient();
         Intent intent = getIntent();
+
         String conversationId = intent.getStringExtra("CONVERSATION_ID");
         conversation = conversationClient.getConversation(conversationId);
 
@@ -101,10 +107,21 @@ public class ChatActivity extends AppCompatActivity {
     }
 
     @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        optionsMenu = menu;
+        return super.onPrepareOptionsMenu(menu);
+    }
+
+    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.audio:
-                requestAudio();
+                if (checkAudioPermissions()) {
+                    toggleAudio();
+                }
+                return true;
+            case R.id.hangup:
+                hangup();
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
@@ -165,6 +182,28 @@ public class ChatActivity extends AppCompatActivity {
                 });
             }
         }).addTo(subscriptions);
+
+        //Listen for incoming calls
+        conversationClient.callEvent().add(new ResultListener<Call>() {
+            @Override
+            public void onSuccess(final Call incomingCall) {
+                logAndShow("answering Call");
+                //Answer an incoming call
+                incomingCall.answer(new RequestHandler<Void>() {
+                    @Override
+                    public void onError(NexmoAPIError apiError) {
+                        logAndShow("Error answer: " + apiError.getMessage());
+                    }
+
+                    @Override
+                    public void onSuccess(Void result) {
+                        currentCall = incomingCall;
+                        attachCallListeners(incomingCall);
+                        showHangUpButton(true);
+                    }
+                });
+            }
+        }).addTo(subscriptions);
     }
 
     private void sendTypeIndicator(Member.TYPING_INDICATOR typingIndicator) {
@@ -219,15 +258,52 @@ public class ChatActivity extends AppCompatActivity {
         });
     }
 
-    private void requestAudio() {
+    private void showHangUpButton(boolean visible) {
+        if (optionsMenu != null) {
+            optionsMenu.findItem(R.id.hangup).setVisible(visible);
+        }
+    }
+
+    private void attachCallListeners(Call incomingCall) {
+        //Listen for incoming member events in a call
+        ResultListener<CallEvent> callEventListener = new ResultListener<CallEvent>() {
+            @Override
+            public void onSuccess(CallEvent message) {
+                Log.d(TAG, "callEvent : state: " + message.getState() + " .content:" + message.toString());
+            }
+        };
+        incomingCall.event().add(callEventListener).addTo(subscriptions);
+    }
+
+
+    private boolean checkAudioPermissions() {
         if (ContextCompat.checkSelfPermission(ChatActivity.this, RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED) {
-            toggleAudio();
+            return true;
         } else {
             if (ActivityCompat.shouldShowRequestPermissionRationale(this, RECORD_AUDIO)) {
                 logAndShow("Need permissions granted for Audio to work");
             } else {
                 ActivityCompat.requestPermissions(ChatActivity.this, new String[]{RECORD_AUDIO}, PERMISSION_REQUEST_AUDIO);
             }
+        }
+        return false;
+    }
+
+    private void hangup() {
+        if (currentCall != null) {
+            currentCall.hangup(new RequestHandler<Void>() {
+                @Override
+                public void onError(NexmoAPIError apiError) {
+                    logAndShow("Cannot hangup: " + apiError.toString());
+                }
+
+                @Override
+                public void onSuccess(Void result) {
+                    logAndShow("Call completed.");
+                    showHangUpButton(false);
+                }
+            });
+
         }
     }
 

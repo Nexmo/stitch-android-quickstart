@@ -1,4 +1,4 @@
-package com.nexmo.enableaudio;
+package com.nexmo.callingusers;
 
 import android.app.Application;
 

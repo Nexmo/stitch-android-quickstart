@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--activity_call.xml-->
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context="com.nexmo.callingusers.CallActivity">
+
+    <TextView
+        android:padding="16dp"
+        android:textSize="32sp"
+        android:gravity="center"
+        android:id="@+id/username"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        tools:text="In Call With Jamie"/>
+
+    <Button
+        android:id="@+id/hangup"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        android:text="Hang Up"
+        app:layout_constraintBottom_toBottomOf="parent" />
+
+</android.support.constraint.ConstraintLayout>

@@ -1,8 +1,11 @@
-package com.nexmo.enableaudio;
+package com.nexmo.callingusers;
 
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -13,6 +16,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.nexmo.sdk.conversation.client.Call;
 import com.nexmo.sdk.conversation.client.Conversation;
 import com.nexmo.sdk.conversation.client.ConversationClient;
 import com.nexmo.sdk.conversation.client.Member;
@@ -23,7 +27,10 @@ import com.nexmo.sdk.conversation.client.event.ResultListener;
 import com.nexmo.sdk.conversation.client.event.container.Invitation;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+
+import static android.Manifest.permission.RECORD_AUDIO;
 
 public class LoginActivity extends AppCompatActivity {
     private static final String TAG = LoginActivity.class.getSimpleName();
@@ -56,9 +63,64 @@ public class LoginActivity extends AppCompatActivity {
         chatBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                retrieveConversations();
+                showCallOrConversationDialog();
             }
         });
+    }
+
+    private void showCallOrConversationDialog() {
+        final AlertDialog.Builder dialog = new AlertDialog.Builder(LoginActivity.this)
+                .setTitle("Call a user or enter conversation?")
+                .setPositiveButton("Enter Conversation", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        retrieveConversations();
+                    }
+                })
+                .setNeutralButton("Call User", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        showCallUserDialog();
+                    }
+                });
+
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                dialog.show();
+            }
+        });
+    }
+
+    private void showCallUserDialog() {
+        final EditText input = new EditText(LoginActivity.this);
+        final AlertDialog.Builder dialog = new AlertDialog.Builder(LoginActivity.this)
+                .setTitle("Which user do you want to call?")
+                .setPositiveButton("Call", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        callUser(input.getText().toString());
+                    }
+                });
+
+        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.MATCH_PARENT);
+        input.setLayoutParams(lp);
+        dialog.setView(input);
+
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                dialog.show();
+            }
+        });
+    }
+
+    private void callUser(String username) {
+        Intent intent = new Intent(LoginActivity.this, CallActivity.class);
+        intent.putExtra("USERNAME", username);
+        startActivity(intent);
     }
 
     private String authenticate(String username) {
@@ -108,7 +170,7 @@ public class LoginActivity extends AppCompatActivity {
             @Override
             public void onSuccess(User user) {
                 showLoginSuccessAndAddInvitationListener(user);
-                retrieveConversations();
+                showCallOrConversationDialog();
             }
         });
     }
