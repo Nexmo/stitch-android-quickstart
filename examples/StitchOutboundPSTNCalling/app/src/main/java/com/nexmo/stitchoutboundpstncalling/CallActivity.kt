@@ -34,6 +34,7 @@ class CallActivity : BaseActivity(), RequestHandler<Call> {
                 currentCall = result
                 callControlBtn.text = "Hangup"
                 callControlBtn.setOnClickListener { endCall() }
+
                 when (result.callState) {
                     Call.CALL_STATE.STARTED -> logAndShow("Started")
                     Call.CALL_STATE.RINGING -> logAndShow("Ringing")

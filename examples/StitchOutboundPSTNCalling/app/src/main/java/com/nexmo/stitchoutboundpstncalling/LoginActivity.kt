@@ -10,6 +10,7 @@ import com.nexmo.stitchoutboundpstncalling.utils.Stitch
 import kotlinx.android.synthetic.main.activity_login.*
 
 class LoginActivity : BaseActivity(), RequestHandler<User> {
+    //replace with your own JWT
     val JWT = ""
 
     private lateinit var client: ConversationClient
@@ -19,7 +20,6 @@ class LoginActivity : BaseActivity(), RequestHandler<User> {
         setContentView(R.layout.activity_login)
 
         client = Stitch.getInstance(this).conversationClient
-
 
         loginBtn.setOnClickListener {
             login()
@@ -37,7 +37,7 @@ class LoginActivity : BaseActivity(), RequestHandler<User> {
 
     override fun onSuccess(result: User?) {
         startActivity(
-                Intent(this, CallActivity::class.java)
+            Intent(this, CallActivity::class.java)
         )
     }
 }
