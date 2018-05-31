@@ -8,7 +8,7 @@ import com.nexmo.sdk.conversation.client.event.RequestHandler
 import com.nexmo.stitchoutboundpstncalling.utils.Stitch
 import kotlinx.android.synthetic.main.activity_call.*
 
-class CallActivity : BaseActivity(), RequestHandler<Call> {
+class CallActivity : BaseActivity() {
     private var currentCall: Call? = null
     private lateinit var client: ConversationClient
 
@@ -32,6 +32,7 @@ class CallActivity : BaseActivity(), RequestHandler<Call> {
 
             override fun onSuccess(result: Call) {
                 currentCall = result
+                callStatus.text = "In call with ${phoneNumberInput.text}"
                 callControlBtn.text = "Hangup"
                 callControlBtn.setOnClickListener { endCall() }
 
@@ -60,17 +61,6 @@ class CallActivity : BaseActivity(), RequestHandler<Call> {
                 }
             }
         })
-    }
-
-    override fun onSuccess(result: Call?) {
-        callStatus.text = "In call with ${phoneNumberInput.text}"
-        currentCall = result
-        callControlBtn.setOnClickListener { endCall() }
-    }
-
-
-    override fun onError(apiError: NexmoAPIError?) {
-        logAndShow(apiError?.message)
     }
 
 }
