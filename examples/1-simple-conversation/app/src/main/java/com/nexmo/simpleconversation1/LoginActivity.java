@@ -21,20 +21,17 @@ public class LoginActivity extends AppCompatActivity {
 
     private ConversationClient conversationClient;
     private TextView loginTxt;
-    private Button loginBtn;
-    private Button chatBtn;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
-        ConversationClientApplication application = (ConversationClientApplication) getApplication();
-        conversationClient = application.getConversationClient();
+        conversationClient = StitchClient.getInstance().getConversationClient();
 
-        loginTxt = (TextView) findViewById(R.id.login_text);
-        loginBtn = (Button) findViewById(R.id.login);
-        chatBtn = (Button) findViewById(R.id.chat);
+        loginTxt = findViewById(R.id.login_text);
+        Button loginBtn = findViewById(R.id.login);
+        Button chatBtn = findViewById(R.id.chat);
 
         loginBtn.setOnClickListener(new View.OnClickListener() {
             @Override
