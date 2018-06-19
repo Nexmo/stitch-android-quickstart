@@ -50,7 +50,7 @@ public class ChatActivity extends AppCompatActivity {
         conversationClient = application.getConversationClient();
 
         Intent intent = getIntent();
-        String conversationId = intent.getStringExtra("CONVERSATION-ID");
+        String conversationId = intent.getStringExtra("CONVERSATION_ID");
         conversation = conversationClient.getConversation(conversationId);
     }
 
