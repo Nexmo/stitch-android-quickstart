@@ -77,7 +77,7 @@ public class LoginActivity extends AppCompatActivity {
 
     private void goToChatActivity() {
         Intent intent = new Intent(LoginActivity.this, ChatActivity.class);
-        intent.putExtra("CONVERSATION-ID", CONVERSATION_ID);
+        intent.putExtra("CONVERSATION_ID", CONVERSATION_ID);
         startActivity(intent);
     }
 
