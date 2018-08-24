@@ -8,3 +8,4 @@ examples/4-Enable-Audio/app/build/
 examples/4-Enable-Audio/build/
 
 examples/4-Enable-Audio/private.key
+examples/PushNotifications/app/google-services.json

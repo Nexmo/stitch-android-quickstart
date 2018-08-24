@@ -4,12 +4,17 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
+import android.text.TextUtils;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.google.firebase.iid.FirebaseInstanceId;
+import com.google.firebase.messaging.FirebaseMessaging;
+import com.google.firebase.messaging.FirebaseMessagingService;
 import com.nexmo.sdk.conversation.client.Conversation;
 import com.nexmo.sdk.conversation.client.ConversationClient;
 import com.nexmo.sdk.conversation.client.User;
@@ -93,8 +98,41 @@ public class LoginActivity extends BaseActivity {
             @Override
             public void onSuccess(User user) {
                 loginTxt.setText("Logged in as " + user.getName() + "\nStart chatting!");
+                registerPushNotifications();
             }
         });
+    }
+
+    private void registerPushNotifications() {
+        //replace with ?
+        /*
+        FirebaseInstanceId.getInstance().getInstanceId().addOnSuccessListener( MyActivity.this,  new OnSuccessListener<InstanceIdResult>() {
+             @Override
+             public void onSuccess(InstanceIdResult instanceIdResult) {
+                   String newToken = instanceIdResult.getToken();
+                   Log.e("newToken",newToken);
+
+             }
+         });
+         */
+        if (!TextUtils.isEmpty(FirebaseInstanceId.getInstance().getToken())) {
+            Log.d(TAG, "Firebase " + FirebaseInstanceId.getInstance().getToken() + " token");
+
+            conversationClient.setPushDeviceToken(FirebaseInstanceId.getInstance().getToken());
+            conversationClient.enableAllPushNotifications(true, new RequestHandler<Void>() {
+                @Override
+                public void onSuccess(Void result) {
+                    logAndShow("push enabled!");
+                }
+                @Override
+                public void onError(NexmoAPIError error) {
+                    logAndShow("Error with push" + error.getMessage());
+                }
+            });
+
+        } else {
+            Log.d(TAG, "FCM not registered yet");
+        }
     }
 
     private void retrieveConversations() {
@@ -114,8 +152,6 @@ public class LoginActivity extends BaseActivity {
             }
         });
     }
-
-
 
     private void showConversationList(final List<Conversation> conversationList) {
         List<String> conversationNames = new ArrayList<>(conversationList.size());
