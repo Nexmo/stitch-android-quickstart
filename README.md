@@ -9,7 +9,7 @@ This is the Android SDK for Nexmo Stitch. Read more about:
 
 ## About In-App Messaging and Voice
 
-Nexmo Stitch enables you to build conversation features where communication can take place across multiple platforms. The context of the conversations is maintained though each communication event taking place within a conversation, no matter the medium.
+Nexmo Stitch enables you to build conversation features where communication can take place across multiple platforms. The context of the conversations is maintained through each communication event taking place within a conversation, no matter the medium.
 
 Currently the Stitch API offers IP voice and IP messaging with the following features:
 
